@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import { MerchantHealth, IMerchantHealth } from '../models/MerchantHealth';
 import { Loan } from '../models/Loan';
 
@@ -238,6 +239,31 @@ export class CreditScoringService {
 
     health.availableCredit = health.creditLimit - health.utilizedAmount;
     await health.save();
+  }
+
+  /**
+   * Update credit utilization with MongoDB session support for transactions
+   */
+  async updateUtilizationWithSession(
+    merchantId: string,
+    amount: number,
+    operation: 'add' | 'remove',
+    session: mongoose.ClientSession
+  ): Promise<void> {
+    const health = await MerchantHealth.findOne({ merchantId }).session(session);
+
+    if (!health) {
+      throw new Error(`Merchant health record not found for ${merchantId}`);
+    }
+
+    if (operation === 'add') {
+      health.utilizedAmount += amount;
+    } else {
+      health.utilizedAmount = Math.max(0, health.utilizedAmount - amount);
+    }
+
+    health.availableCredit = health.creditLimit - health.utilizedAmount;
+    await health.save({ session });
   }
 
   /**

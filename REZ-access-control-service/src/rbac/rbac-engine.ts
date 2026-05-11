@@ -52,13 +52,23 @@ export class RBACEngine {
   }
 
   private initializeDefaultRoles(): void {
-    // Admin role - full access
+    // Admin role - explicit permissions for all resources (least privilege)
     const adminRole: Role = {
       id: 'admin',
       name: 'Administrator',
       description: 'Full system access with all permissions',
       permissions: [
-        { resource: '*', actions: ['*'] }
+        { resource: 'users', actions: ['*'] },
+        { resource: 'roles', actions: ['*'] },
+        { resource: 'policies', actions: ['*'] },
+        { resource: 'permissions', actions: ['*'] },
+        { resource: 'audit', actions: ['read', 'write'] },
+        { resource: 'system', actions: ['read', 'update'] },
+        { resource: 'identities', actions: ['*'] },
+        { resource: 'loans', actions: ['*'] },
+        { resource: 'bnpl', actions: ['*'] },
+        { resource: 'payments', actions: ['*'] },
+        { resource: 'reports', actions: ['*'] }
       ],
       createdAt: new Date(),
       updatedAt: new Date()

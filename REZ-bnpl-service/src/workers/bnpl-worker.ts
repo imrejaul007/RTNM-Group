@@ -1,8 +1,17 @@
 import { Queue, Worker } from 'bullmq';
 import Redis from 'ioredis';
 import { BNPLApplication } from '../models/BNPL';
+import logger from '../utils/logger';
 
-const connection = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
+const redisUrl = process.env.REDIS_URL;
+const isProduction = process.env.NODE_ENV === 'production';
+
+if (!redisUrl && isProduction) {
+  logger.error('REDIS_URL environment variable is required in production');
+  process.exit(1);
+}
+
+const connection = new Redis(redisUrl || 'redis://localhost:6379');
 
 // EMI Reminder Queue
 export const emiReminderQueue = new Queue('bnpl-emi-reminders', { connection });
@@ -121,7 +130,11 @@ const emiWorker = new Worker('bnpl-emi-processing', async (job) => {
   // Process auto-debit here
   // In production, integrate with payment service
 
-  console.log(`Processing EMI ${emiNumber} for application ${applicationId}`);
+  logger.info(`Processing EMI ${emiNumber} for application ${applicationId}`, {
+    jobId: job.id,
+    applicationId,
+    emiNumber
+  });
 
 }, { connection });
 

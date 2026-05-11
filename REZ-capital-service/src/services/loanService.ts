@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import { Loan, ILoan, LoanType, LoanStatus } from '../models/Loan';
 import { MerchantHealth } from '../models/MerchantHealth';
 import { creditScoringService } from './creditScoringService';
@@ -91,42 +92,54 @@ export class LoanService {
 
   /**
    * Disburse a loan to the merchant via NBFC partner
+   * Uses MongoDB transaction to ensure atomicity
    */
   async disburseLoan(loanId: string, partnerId: string = 'capital_float'): Promise<ILoan> {
-    const loan = await Loan.findById(loanId);
-
-    if (!loan) {
-      throw new Error('Loan not found');
-    }
-
-    if (loan.status !== 'approved') {
-      throw new Error(`Cannot disburse loan with status: ${loan.status}`);
-    }
+    const session = await mongoose.startSession();
+    session.startTransaction();
 
     try {
-      // Initiate disbursement via partner
+      const loan = await Loan.findById(loanId).session(session);
+
+      if (!loan) {
+        throw new Error('Loan not found');
+      }
+
+      if (loan.status !== 'approved') {
+        throw new Error(`Cannot disburse loan with status: ${loan.status}`);
+      }
+
+      // Initiate disbursement via partner (outside transaction - partner call is idempotent)
       const partnerRef = await partnerService.initiateDisbursement(loan, partnerId);
 
+      // Update loan status
       loan.status = 'disbursed';
       loan.disbursedAt = new Date();
       loan.partnerRef = partnerRef;
       loan.partnerId = partnerId;
       loan.disbursedAmount = loan.amount;
+      await loan.save({ session });
 
-      // Update merchant utilization
-      await creditScoringService.updateUtilization(
+      // Update merchant utilization (within transaction)
+      await creditScoringService.updateUtilizationWithSession(
         loan.merchantId,
         loan.amount,
-        'add'
+        'add',
+        session
       );
 
-      await loan.save();
+      // Commit transaction
+      await session.commitTransaction();
       logger.info(`Loan disbursed: ${loan._id} via ${partnerId}, ref: ${partnerRef}`);
 
       return loan;
     } catch (error) {
+      // Abort transaction on any error
+      await session.abortTransaction();
       logger.error(`Loan disbursement failed: ${loanId}`, error);
       throw error;
+    } finally {
+      session.endSession();
     }
   }
 
@@ -331,7 +344,7 @@ export class LoanService {
     merchantId: string,
     status?: LoanStatus
   ): Promise<ILoan[]> {
-    const query: any = { merchantId };
+    const query: Record<string, unknown> = { merchantId };
     if (status) {
       query.status = status;
     }

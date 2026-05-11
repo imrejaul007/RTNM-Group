@@ -1,8 +1,40 @@
 import { Router, Request, Response } from 'express';
 import { z } from 'zod';
 import { BNPLApplication, BNPLTenure } from '../models/BNPL';
+import Redis from 'ioredis';
+import logger from '../utils/logger';
 
 const router = Router();
+
+// Idempotency helper for BNPL payments
+const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
+
+/**
+ * Execute with idempotency protection
+ * Prevents duplicate payment processing
+ */
+async function withIdempotency<T>(
+  key: string,
+  fn: () => Promise<T>,
+  ttlSeconds: number = 86400
+): Promise<{ result: T; cached: boolean }> {
+  const cacheKey = `bnpl:idempotency:${key}`;
+
+  // Check if key exists
+  const cached = await redis.get(cacheKey);
+  if (cached) {
+    logger.info('Idempotency key hit for BNPL repay', { key });
+    return { result: JSON.parse(cached), cached: true };
+  }
+
+  // Execute function
+  const result = await fn();
+
+  // Store result
+  await redis.setex(cacheKey, ttlSeconds, JSON.stringify(result));
+
+  return { result, cached: false };
+}
 
 // Interest rates by tenure
 const INTEREST_RATES = {
@@ -42,7 +74,7 @@ const checkStatusSchema = z.object({
 function calculateEMI(principal: number, annualRate: number, tenureMonths: number): number {
   const monthlyRate = annualRate / 12 / 100;
   const emi = (principal * monthlyRate * Math.pow(1 + monthlyRate, tenureMonths)) /
-              (Math.pow(1 + monthlyRate, tenureMonths) - 1;
+              (Math.pow(1 + monthlyRate, tenureMonths) - 1);
   return Math.ceil(emi);
 }
 
@@ -203,68 +235,90 @@ router.post('/repay', async (req: Request, res: Response) => {
   try {
     const data = repaymentSchema.parse(req.body);
 
-    const application = await BNPLApplication.findById(data.applicationId);
+    // Extract idempotency key from header or body
+    const idempotencyKey = req.headers['x-idempotency-key'] as string ||
+      req.body.idempotencyKey ||
+      `repay:${data.applicationId}:${data.emiNumber}`;
 
-    if (!application) {
-      return res.status(404).json({ error: 'Application not found' });
-    }
+    // Execute with idempotency protection
+    const { result, cached } = await withIdempotency(idempotencyKey, async () => {
+      const application = await BNPLApplication.findById(data.applicationId);
 
-    if (application.status !== 'active') {
-      return res.status(400).json({
-        error: `Cannot repay. Status: ${application.status}`
+      if (!application) {
+        throw { status: 404, message: 'Application not found' };
+      }
+
+      if (application.status !== 'active') {
+        throw { status: 400, message: `Cannot repay. Status: ${application.status}` };
+      }
+
+      const emi = application.emiSchedule.find(e => e.emiNumber === data.emiNumber);
+
+      if (!emi || emi.status === 'paid') {
+        throw { status: 400, message: 'Invalid EMI number or already paid' };
+      }
+
+      // Process payment via wallet/payment service
+      // In production, call payment service here
+
+      const transactionId = `TXN_BNPL_${Date.now()}`;
+
+      // Update EMI
+      emi.status = 'paid';
+      emi.paidAt = new Date();
+      emi.transactionId = transactionId;
+
+      // Add payment record
+      application.payments.push({
+        emiNumber: data.emiNumber,
+        amount: emi.amount,
+        principal: emi.principal,
+        interest: emi.interest,
+        paidAt: new Date(),
+        transactionId,
+        paymentMethod: 'wallet'
       });
-    }
 
-    const emi = application.emiSchedule.find(e => e.emiNumber === data.emiNumber);
+      // Update next EMI date
+      const nextPendingEMI = application.emiSchedule.find(e => e.status === 'pending');
+      application.nextEmiDate = nextPendingEMI?.dueDate || new Date();
 
-    if (!emi || emi.status === 'paid') {
-      return res.status(400).json({ error: 'Invalid EMI number or already paid' });
-    }
+      // Check if fully paid
+      const allPaid = application.emiSchedule.every(e => e.status === 'paid');
+      if (allPaid) {
+        application.status = 'paid';
+      }
 
-    // Process payment via wallet/payment service
-    // In production, call payment service here
+      await application.save();
 
-    const transactionId = `TXN_BNPL_${Date.now()}`;
-
-    // Update EMI
-    emi.status = 'paid';
-    emi.paidAt = new Date();
-    emi.transactionId = transactionId;
-
-    // Add payment record
-    application.payments.push({
-      emiNumber: data.emiNumber,
-      amount: emi.amount,
-      principal: emi.principal,
-      interest: emi.interest,
-      paidAt: new Date(),
-      transactionId,
-      paymentMethod: 'wallet'
+      return {
+        success: true,
+        transactionId,
+        emiNumber: data.emiNumber,
+        amount: emi.amount,
+        status: application.status,
+        remainingEMIs: application.tenure - application.payments.length
+      };
     });
 
-    // Update next EMI date
-    const nextPendingEMI = application.emiSchedule.find(e => e.status === 'pending');
-    application.nextEmiDate = nextPendingEMI?.dueDate || new Date();
-
-    // Check if fully paid
-    const allPaid = application.emiSchedule.every(e => e.status === 'paid');
-    if (allPaid) {
-      application.status = 'paid';
+    // Return cached result if idempotency key was hit
+    if (cached) {
+      res.json({
+        ...result,
+        cached: true,
+        message: 'Payment already processed'
+      });
+      return;
     }
 
-    await application.save();
-
-    res.json({
-      success: true,
-      transactionId,
-      emiNumber: data.emiNumber,
-      amount: emi.amount,
-      status: application.status,
-      remainingEMIs: application.tenure - application.payments.length
-    });
+    res.json(result);
 
   } catch (error: any) {
-    res.status(400).json({ error: error.message });
+    if (error.status) {
+      res.status(error.status).json({ error: error.message });
+    } else {
+      res.status(400).json({ error: error.message });
+    }
   }
 });
 

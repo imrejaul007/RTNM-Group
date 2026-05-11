@@ -1,6 +1,17 @@
 import { Request, Response, NextFunction } from 'express';
-import { nbfcPartners } from '../config/nbfcPartners';
+import { nbfcPartners, NBFCPartnerConfig } from '../config/nbfcPartners';
 import { partnerService } from '../services/partnerService';
+
+// Extended request interface with partner properties
+export interface PartnerRequest extends Request {
+  partnerId?: string;
+  partnerConfig?: NBFCPartnerConfig;
+  partnerHealth?: {
+    available: boolean;
+    latency: number;
+    lastCheck: Date;
+  };
+}
 
 /**
  * Middleware to authenticate NBFC partner requests
@@ -34,13 +45,13 @@ export const partnerAuth = async (
       return;
     }
 
-    // Check timestamp to prevent replay attacks (within 5 minutes)
+    // Check timestamp to prevent replay attacks (within 30 seconds)
     if (timestamp) {
       const requestTime = new Date(timestamp).getTime();
       const now = Date.now();
-      const fiveMinutes = 5 * 60 * 1000;
+      const thirtySeconds = 30 * 1000;
 
-      if (Math.abs(now - requestTime) > fiveMinutes) {
+      if (Math.abs(now - requestTime) > thirtySeconds) {
         res.status(401).json({
           success: false,
           error: 'Request timestamp expired',
@@ -66,12 +77,13 @@ export const partnerAuth = async (
       }
     }
 
-    // Attach partner info to request
-    (req as any).partnerId = partnerId;
-    (req as any).partnerConfig = partnerConfig;
+    // Attach partner info to request with proper typing
+    const partnerReq = req as PartnerRequest;
+    partnerReq.partnerId = partnerId;
+    partnerReq.partnerConfig = partnerConfig;
 
     next();
-  } catch (error: any) {
+  } catch (error) {
     res.status(500).json({
       success: false,
       error: 'Authentication error',
@@ -88,7 +100,8 @@ export const requirePartnerHealth = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const partnerId = (req as any).partnerId;
+    const partnerReq = req as PartnerRequest;
+    const partnerId = partnerReq.partnerId;
 
     if (!partnerId) {
       res.status(401).json({
@@ -109,9 +122,9 @@ export const requirePartnerHealth = async (
       return;
     }
 
-    (req as any).partnerHealth = health;
+    partnerReq.partnerHealth = health;
     next();
-  } catch (error: any) {
+  } catch (error) {
     res.status(500).json({
       success: false,
       error: 'Partner health check failed',
@@ -129,7 +142,8 @@ export const partnerRateLimit = (
   const requests = new Map<string, { count: number; resetTime: number }>();
 
   return (req: Request, res: Response, next: NextFunction): void => {
-    const partnerId = (req as any).partnerId || req.ip;
+    const partnerReq = req as PartnerRequest;
+    const partnerId = partnerReq.partnerId || req.ip;
     const now = Date.now();
 
     let record = requests.get(partnerId);

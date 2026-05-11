@@ -13,11 +13,19 @@ export interface NBFCPartnerConfig {
   timeout: number;
 }
 
+function getRequiredEnv(envVar: string, partnerId: string, field: string): string {
+  const value = process.env[envVar];
+  if (!value) {
+    throw new Error(`Missing required environment variable ${envVar} for partner ${partnerId}. ${field} is required.`);
+  }
+  return value;
+}
+
 export const nbfcPartners: Record<string, NBFCPartnerConfig> = {
   capital_float: {
     name: 'Capital Float',
     apiUrl: process.env.CAPITAL_FLOAT_API_URL || 'https://api.capitalfloat.com/v2',
-    apiKey: process.env.CAPITAL_FLOAT_API_KEY || '',
+    apiKey: getRequiredEnv('CAPITAL_FLOAT_API_KEY', 'capital_float', 'API Key'),
     enabled: process.env.CAPITAL_FLOAT_ENABLED === 'true',
     endpoints: {
       disbursement: '/disbursements',
@@ -33,7 +41,7 @@ export const nbfcPartners: Record<string, NBFCPartnerConfig> = {
   pinelabs: {
     name: 'PineLabs',
     apiUrl: process.env.PINELABS_API_URL || 'https://api.pinelabs.com/v1',
-    apiKey: process.env.PINELABS_API_KEY || '',
+    apiKey: getRequiredEnv('PINELABS_API_KEY', 'pinelabs', 'API Key'),
     enabled: process.env.PINELABS_ENABLED === 'true',
     endpoints: {
       disbursement: '/merchant/advances',
@@ -49,7 +57,7 @@ export const nbfcPartners: Record<string, NBFCPartnerConfig> = {
   indifi: {
     name: 'Indifi',
     apiUrl: process.env.INDIFI_API_URL || 'https://api.indifi.com/v1',
-    apiKey: process.env.INDIFI_API_KEY || '',
+    apiKey: getRequiredEnv('INDIFI_API_KEY', 'indifi', 'API Key'),
     enabled: process.env.INDIFI_ENABLED === 'true',
     endpoints: {
       disbursement: '/loans',
@@ -65,7 +73,7 @@ export const nbfcPartners: Record<string, NBFCPartnerConfig> = {
   lending_kart: {
     name: 'LendingKart',
     apiUrl: process.env.LENDINGKART_API_URL || 'https://api.lendingkart.com/v2',
-    apiKey: process.env.LENDINGKART_API_KEY || '',
+    apiKey: getRequiredEnv('LENDINGKART_API_KEY', 'lending_kart', 'API Key'),
     enabled: process.env.LENDINGKART_ENABLED === 'true',
     endpoints: {
       disbursement: '/disbursements/initiate',

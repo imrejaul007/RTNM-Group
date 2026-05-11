@@ -6,6 +6,7 @@ import { RoleDefinitions } from './roles/role-definitions';
 import { PermissionAudit } from './audit/permission-audit';
 import { PolicyEngine } from './policies/policy-engine';
 import { logger } from './utils/logger';
+import { internalServiceAuth, AuthenticatedRequest } from './middleware/auth';
 
 export interface AccessContext {
   userId: string;
@@ -53,10 +54,13 @@ class AccessControlService {
   }
 
   private setupRoutes(): void {
-    // Health check
+    // Health check (no auth required)
     this.app.get('/health', (req: Request, res: Response) => {
       res.json({ status: 'healthy', timestamp: new Date().toISOString() });
     });
+
+    // All /api/v1/* routes require internal service authentication
+    this.app.use('/api/v1', internalServiceAuth);
 
     // Check access permission
     this.app.post('/api/v1/access/check', async (req: Request, res: Response) => {
@@ -86,7 +90,7 @@ class AccessControlService {
       }
     });
 
-    // Get audit logs
+    // Get audit logs (requires 'read' permission on audit)
     this.app.get('/api/v1/audit/logs', async (req: Request, res: Response) => {
       try {
         const { userId, resource, startDate, endDate } = req.query;
@@ -103,7 +107,7 @@ class AccessControlService {
       }
     });
 
-    // Role management
+    // Role management (read-only by default)
     this.app.get('/api/v1/roles', (req: Request, res: Response) => {
       const roles = this.roles.getAllRoles();
       res.json({ roles });

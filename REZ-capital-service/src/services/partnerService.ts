@@ -266,7 +266,7 @@ export class PartnerService {
   }
 
   /**
-   * Verify partner webhook signature
+   * Verify partner webhook signature using HMAC-SHA256
    */
   verifyWebhookSignature(
     partnerId: string,
@@ -276,19 +276,30 @@ export class PartnerService {
     const config = nbfcPartners[partnerId];
 
     if (!config || !config.webhookSecret) {
+      logger.warn(`Webhook verification failed: missing config or secret for partner ${partnerId}`);
       return false;
     }
 
-    // In production, implement proper HMAC verification
-    // For example with crypto:
-    // const crypto = require('crypto');
-    // const expectedSignature = crypto
-    //   .createHmac('sha256', config.webhookSecret)
-    //   .update(payload)
-    //   .digest('hex');
-    // return signature === expectedSignature;
+    // Compute expected signature using HMAC-SHA256
+    const crypto = require('crypto');
+    const expectedSignature = crypto
+      .createHmac('sha256', config.webhookSecret)
+      .update(payload, 'utf8')
+      .digest('hex');
 
-    return true; // Placeholder
+    // Use timing-safe comparison to prevent timing attacks
+    const signatureBuffer = Buffer.from(signature);
+    const expectedBuffer = Buffer.from(expectedSignature);
+
+    if (signatureBuffer.length !== expectedBuffer.length) {
+      return false;
+    }
+
+    try {
+      return crypto.timingSafeEqual(signatureBuffer, expectedBuffer);
+    } catch {
+      return false;
+    }
   }
 }
 

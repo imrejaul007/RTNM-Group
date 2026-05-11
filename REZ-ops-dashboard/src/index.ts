@@ -90,7 +90,12 @@ function requireSuperAdmin(req: express.Request, res: express.Response, next: ex
 app.use(requireAuth);
 
 const PORT = 4032;
-const MONGODB = 'mongodb+srv://work_db_user:ZAFYAYH1zK0C74Ap@rez-intent-graph.a8ilqgi.mongodb.net/rez-ops';
+const MONGODB = process.env.MONGODB_URI;
+
+if (!MONGODB) {
+  console.error('[CONFIG] MONGODB_URI environment variable is required');
+  process.exit(1);
+}
 
 // Feature Flags Schema
 const FeatureFlag = mongoose.model('FeatureFlag', new mongoose.Schema({

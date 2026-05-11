@@ -6,6 +6,7 @@ import {
   processOverdueAccounts,
   updateCreditScores
 } from './workers/bnpl-worker';
+import logger from './utils/logger';
 
 const app = express();
 const PORT = process.env.PORT || 3080;
@@ -22,11 +23,20 @@ app.get('/health', (req, res) => {
 });
 
 // Connect to MongoDB
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/rez_bnpl';
+const MONGODB_URI = process.env.MONGODB_URI;
+const isProduction = process.env.NODE_ENV === 'production';
 
-mongoose.connect(MONGODB_URI)
+if (!MONGODB_URI) {
+  if (isProduction) {
+    logger.error('MONGODB_URI environment variable is required in production');
+    process.exit(1);
+  }
+  logger.warn('MONGODB_URI not set, using localhost (development only)');
+}
+
+mongoose.connect(MONGODB_URI || 'mongodb://localhost:27017/rez_bnpl')
   .then(() => {
-    console.log('Connected to MongoDB');
+    logger.info('Connected to MongoDB');
 
     // Schedule daily jobs
     setInterval(processOverdueAccounts, 24 * 60 * 60 * 1000); // Daily
@@ -34,10 +44,10 @@ mongoose.connect(MONGODB_URI)
     updateCreditScores();
 
     app.listen(PORT, () => {
-      console.log(`BNPL Service running on port ${PORT}`);
+      logger.info(`BNPL Service running on port ${PORT}`);
     });
   })
   .catch((err) => {
-    console.error('MongoDB connection error:', err);
+    logger.error('MongoDB connection error:', err);
     process.exit(1);
   });

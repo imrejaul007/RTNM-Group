@@ -7,6 +7,7 @@
  */
 
 import type { Middleware } from 'itty-router';
+import { jwtVerify, decodeJwt } from 'jose';
 
 interface JWTPayload {
   sub: string; // User ID
@@ -24,50 +25,44 @@ interface JWTValidationResult {
 }
 
 /**
- * Decode and validate a JWT token
- * Does NOT verify the signature (requires secret) — signature verification
- * should be done by the auth service or with a shared secret
+ * Decode and validate a JWT token with cryptographic signature verification
  */
-function decodeJWT(token: string): JWTValidationResult {
+async function verifyJWT(token: string, secret: Uint8Array): Promise<JWTValidationResult> {
   try {
     const parts = token.split('.');
     if (parts.length !== 3) {
       return { valid: false, error: 'Invalid token format' };
     }
 
-    const [headerB64, payloadB64, signatureB64] = parts;
-
-    // Decode payload
-    const payloadJson = atob(headerB64);
-    const header = JSON.parse(payloadJson);
-
-    // Verify algorithm
-    if (header.alg !== 'HS256' && header.alg !== 'RS256') {
-      return { valid: false, error: `Unsupported algorithm: ${header.alg}` };
+    // First decode header to check algorithm (without verification)
+    const headerData = JSON.parse(atob(parts[0]));
+    if (headerData.alg !== 'HS256' && headerData.alg !== 'RS256') {
+      return { valid: false, error: `Unsupported algorithm: ${headerData.alg}` };
     }
 
-    // Decode payload
-    const payloadStr = payloadB64
-      .replace(/-/g, '+')
-      .replace(/_/g, '/');
-    const padding = '='.repeat((4 - payloadStr.length % 4) % 4);
-    const payloadDecoded = atob(payloadStr + padding);
-    const payload: JWTPayload = JSON.parse(payloadDecoded);
+    // Verify signature and decode payload using jose
+    const { payload } = await jwtVerify(token, secret, {
+      algorithms: ['HS256', 'RS256']
+    });
 
     // Validate required fields
     if (!payload.sub) {
       return { valid: false, error: 'Missing subject (sub) claim' };
     }
 
-    // Check expiration
-    const now = Math.floor(Date.now() / 1000);
-    if (payload.exp && payload.exp < now) {
-      return { valid: false, error: 'Token expired' };
-    }
+    const jwtPayload: JWTPayload = {
+      sub: payload.sub as string,
+      iat: payload.iat || 0,
+      exp: payload.exp || 0,
+      iss: payload.iss || '',
+      scope: payload.scope as string[] | undefined,
+      client_id: payload.client_id as string | undefined
+    };
 
-    return { valid: true, payload };
+    return { valid: true, payload: jwtPayload };
   } catch (error) {
-    return { valid: false, error: 'Failed to decode token' };
+    const message = error instanceof Error ? error.message : 'Token verification failed';
+    return { valid: false, error: message };
   }
 }
 
@@ -118,8 +113,25 @@ export function withJWTValidation(options: {
       return undefined;
     }
 
-    // Decode and validate token
-    const result = decodeJWT(token);
+    // Get JWT secret from environment
+    const jwtSecret = env.JWT_SECRET;
+    if (!jwtSecret) {
+      console.error('[JWTValidation] JWT_SECRET not configured');
+      return new Response(JSON.stringify({
+        error: 'Internal Server Error',
+        message: 'Authentication service misconfigured',
+        code: 'CONFIG_ERROR',
+      }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Convert secret to Uint8Array for jose
+    const secretKey = new TextEncoder().encode(jwtSecret);
+
+    // Verify JWT with signature validation
+    const result = await verifyJWT(token, secretKey);
 
     if (!result.valid) {
       console.warn('[JWTValidation] Invalid token:', {
@@ -142,7 +154,7 @@ export function withJWTValidation(options: {
     }
 
     // Token is valid — attach payload to request for downstream use
-    (request as any).__jwt = result.payload;
+    (request as Record<string, unknown>).__jwt = result.payload;
 
     // Log successful validation
     console.info('[JWTValidation] Token valid:', {

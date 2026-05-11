@@ -317,8 +317,17 @@ export class ABACEngine {
         return false;
       case 'matches':
         if (typeof actual !== 'string') return false;
-        const regex = new RegExp(expected);
-        return regex.test(actual);
+        try {
+          // Validate regex pattern is safe before creating
+          if (!this.isValidRegexPattern(expected)) {
+            logger.warn(`Potential ReDoS pattern detected: ${expected}`);
+            return false;
+          }
+          const regex = new RegExp(expected);
+          return regex.test(actual);
+        } catch {
+          return false;
+        }
       default:
         logger.warn(`Unknown operator: ${operator}`);
         return false;
@@ -403,5 +412,32 @@ export class ABACEngine {
 
   getEnvironmentAttributes(): Record<string, any> {
     return { ...this.environmentAttributes };
+  }
+
+  /**
+   * Validate regex pattern to prevent ReDoS attacks
+   * Checks for patterns that could cause exponential backtracking
+   */
+  private isValidRegexPattern(pattern: string): boolean {
+    // Reject patterns that are likely to cause ReDoS
+    const dangerousPatterns = [
+      /(\.\*){3,}/,           // Multiple consecutive .*
+      /\(\.\*\+\)\{2,}/,      // Multiple nested .*+
+      /(\+\|\*){2,}/,         // Multiple consecutive + or *
+      /\(.*\)\{.*\}/,         // Nested quantifiers
+    ];
+
+    for (const dangerous of dangerousPatterns) {
+      if (dangerous.test(pattern)) {
+        return false;
+      }
+    }
+
+    // Check for excessive repetition
+    if (pattern.length > 100) {
+      return false;
+    }
+
+    return true;
   }
 }
