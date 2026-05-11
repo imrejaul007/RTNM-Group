@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>REE Admin - Rule Manager</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f7; color: #1d1d1f; min-height: 100vh; }
+    .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 24px 32px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .header h1 { font-size: 24px; font-weight: 700; }
+    .header p { font-size: 14px; opacity: 0.9; margin-top: 4px; }
+    .container { max-width: 1400px; margin: 0 auto; padding: 24px 32px; }
+    .tabs { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+    .tab { padding: 10px 20px; background: #e8e8ed; border: none; border-radius: 20px; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.2s; }
+    .tab.active { background: #007aff; color: white; }
+    .tab:hover:not(.active) { background: #d2d2d7; }
+    .content { display: none; }
+    .content.active { display: block; }
+    .card { background: white; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #f0f0f0; }
+    .card-title { font-size: 18px; font-weight: 600; }
+    .badge { display: inline-block; padding: 4px 12px; border-radius: 16px; font-size: 12px; font-weight: 600; }
+    .badge-active { background: #d1f7d1; color: #1a8f1a; }
+    .badge-inactive { background: #ffd2d2; color: #c00; }
+    .badge-gold { background: #fff4d1; color: #b8860b; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+    .rule-card { background: #fafafa; border-radius: 10px; padding: 20px; border: 1px solid #e8e8ed; transition: all 0.2s; cursor: pointer; }
+    .rule-card:hover { border-color: #007aff; box-shadow: 0 2px 8px rgba(0,122,255,0.1); }
+    .rule-name { font-size: 16px; font-weight: 600; color: #007aff; margin-bottom: 8px; }
+    .rule-desc { font-size: 13px; color: #666; margin-bottom: 12px; line-height: 1.5; }
+    .rule-meta { display: flex; gap: 12px; font-size: 12px; color: #86868b; }
+    .rule-type { background: #f0f0f0; padding: 4px 8px; border-radius: 4px; }
+    .priority { color: #007aff; }
+    .input-group { display: flex; gap: 12px; margin-bottom: 20px; }
+    input, select, textarea { flex: 1; padding: 12px 16px; border: 1px solid #d2d2d7; border-radius: 8px; font-size: 15px; }
+    button { padding: 12px 24px; background: #007aff; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+    button:hover { background: #0077ed; }
+    button.secondary { background: #e8e8ed; color: #1d1d1f; }
+    button.secondary:hover { background: #d2d2d7; }
+    .result { margin-top: 20px; padding: 16px; background: #f5f7ff; border-radius: 8px; }
+    .result-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e8e8ed; }
+    .result-row:last-child { border: none; font-weight: 600; }
+    .result-label { color: #666; }
+    .result-value { color: #1d1d1f; }
+    .success { color: #34c759; }
+    .error { color: #ff3b30; }
+    .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+    .modal.active { display: flex; }
+    .modal-content { background: white; border-radius: 16px; padding: 32px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto; }
+    .modal-header { display: flex; justify-content: space-between; margin-bottom: 24px; }
+    .modal-title { font-size: 20px; font-weight: 700; }
+    .modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: #86868b; }
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 8px; color: #1d1d1f; }
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+    .stat-card { background: white; padding: 20px; border-radius: 12px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .stat-value { font-size: 32px; font-weight: 700; color: #007aff; }
+    .stat-label { font-size: 12px; color: #86868b; margin-top: 4px; }
+    @media (max-width: 768px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>REE Rule Manager</h1>
+    <p>Business Rules & Economic Configuration</p>
+  </div>
+  <div class="container">
+    <div class="tabs">
+      <button class="tab active" onclick="showTab('rules')">Rules</button>
+      <button class="tab" onclick="showTab('create')">+ Create Rule</button>
+      <button class="tab" onclick="showTab('simulate')">Simulate</button>
+      <button class="tab" onclick="showTab('analytics')">Analytics</button>
+    </div>
+
+    <div id="rules" class="content active">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Business Rules</span>
+          <select id="rule-filter" onchange="filterRules()">
+            <option value="all">All Rules</option>
+            <option value="commission">Commission</option>
+            <option value="cashback">Cashback</option>
+            <option value="reward">Reward</option>
+            <option value="karma">Karma</option>
+            <option value="fraud_check">Fraud</option>
+          </select>
+        </div>
+        <div id="rules-grid" class="grid"></div>
+      </div>
+    </div>
+
+    <div id="create" class="content">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Create New Rule</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Rule Name</label>
+          <input type="text" id="rule-name" placeholder="e.g., Gold Tier Cashback">
+        </div>
+        <div class="input-group">
+          <div class="form-group">
+            <label class="form-label">Rule Type</label>
+            <select id="rule-type">
+              <option value="commission">Commission</option>
+              <option value="cashback">Cashback</option>
+              <option value="reward">Reward</option>
+              <option value="karma">Karma</option>
+              <option value="fraud_check">Fraud Check</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Category</label>
+            <input type="text" id="rule-category" placeholder="e.g., user, merchant, transaction">
+          </div>
+        </div>
+        <div class="input-group">
+          <div class="form-group">
+            <label class="form-label">Priority</label>
+            <input type="number" id="rule-priority" value="10">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Coin Type</label>
+            <select id="coin-type">
+              <option value="rez">REZ Coins</option>
+              <option value="branded">Branded Coins</option>
+              <option value="cashback">Cashback</option>
+              <option value="promo">Promo Coins</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Formula (e.g., amount * 0.05)</label>
+          <input type="text" id="rule-formula" placeholder="amount * 0.05">
+        </div>
+        <button onclick="createRule()">Create Rule</button>
+      </div>
+    </div>
+
+    <div id="simulate" class="content">
+      <div class="card">
+        <div class="card-title">What-If Simulator</div>
+        <p style="color: #666; margin: 16px 0">Test rule changes before deploying</p>
+        <div class="input-group">
+          <div class="form-group">
+            <label class="form-label">Transaction Amount (₹)</label>
+            <input type="number" id="sim-amount" value="500">
+          </div>
+          <div class="form-group">
+            <label class="form-label">User Tier</label>
+            <select id="sim-tier">
+              <option value="0">Starter</option>
+              <option value="5000">Active</option>
+              <option value="25000">Gold</option>
+              <option value="100000">Platinum</option>
+            </select>
+          </div>
+        </div>
+        <button class="secondary" onclick="simulate()">Simulate</button>
+        <div id="sim-result" class="result" style="display:none"></div>
+      </div>
+    </div>
+
+    <div id="analytics" class="content">
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-value">24</div><div class="stat-label">Active Rules</div></div>
+        <div class="stat-card"><div class="stat-value">₹0.12</div><div class="stat-label">Avg Cost/Transaction</div></div>
+        <div class="stat-card"><div class="stat-value">98.5%</div><div class="stat-label">Rule Accuracy</div></div>
+        <div class="stat-card"><div class="stat-value">0</div><div class="stat-label">Fraud Blocked Today</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Recent Rule Executions</div>
+        <div class="result-row"><span class="result-label">commission.rule_1</span><span class="result-value">₹45.00 processed</span></div>
+        <div class="result-row"><span class="result-label">cashback.user_1</span><span class="success">✓ Applied</span></div>
+        <div class="result-row"><span class="result-label">fraud.check_1</span><span class="success">✓ Passed</span></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const REE = 'http://localhost:4000/api';
+
+    async function loadRules() {
+      try {
+        const res = await fetch(REE + '/admin/rules');
+        const data = await res.json();
+        const rules = data.data?.rules || getMockRules();
+        renderRules(rules);
+      } catch { renderRules(getMockRules()); }
+    }
+
+    function getMockRules() {
+      return [
+        { _id: '1', ruleType: 'commission', category: 'merchant', name: 'Restaurant Commission', priority: 10, isActive: true, description: 'Platform takes 12% commission' },
+        { _id: '2', ruleType: 'cashback', category: 'user', name: 'Gold Cashback', priority: 20, isActive: true, description: 'Gold tier gets 6% cashback' },
+        { _id: '3', ruleType: 'reward', category: 'social', name: 'Social Share Bonus', priority: 15, isActive: true, description: '5% bonus for verified shares' },
+        { _id: '4', ruleType: 'fraud_check', category: 'system', name: 'Rapid Click Detection', priority: 100, isActive: true, description: 'Block >10 clicks in 30s' },
+        { _id: '5', ruleType: 'karma', category: 'impact', name: 'Volunteer Hours', priority: 5, isActive: true, description: '15 karma per volunteer hour' },
+      ];
+    }
+
+    function renderRules(rules) {
+      const grid = document.getElementById('rules-grid');
+      grid.innerHTML = rules.map(r => `
+        <div class="rule-card" onclick="editRule('${r._id}')">
+          <div class="rule-name">${r.name}</div>
+          <div class="rule-desc">${r.description || 'No description'}</div>
+          <div class="rule-meta">
+            <span class="rule-type">${r.ruleType}</span>
+            <span class="priority">Priority: ${r.priority}</span>
+            <span class="${r.isActive ? 'success' : 'error'}">${r.isActive ? 'Active' : 'Inactive'}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function filterRules() {
+      const type = document.getElementById('rule-filter').value;
+      const rules = getMockRules().filter(r => type === 'all' || r.ruleType === type);
+      renderRules(rules);
+    }
+
+    function showTab(tab) {
+      document.querySelectorAll('.content').forEach(e => e.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach(e => e.classList.remove('active'));
+      document.getElementById(tab).classList.add('active');
+      event.target.classList.add('active');
+      if (tab === 'rules') loadRules();
+    }
+
+    async function simulate() {
+      const amount = parseInt(document.getElementById('sim-amount').value) || 500;
+      const tier = document.getElementById('sim-tier').value;
+      try {
+        const res = await fetch(REE + '/query/cashback', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ amount })
+        });
+        const data = await res.json();
+        const r = data.data || {};
+        const total = (r.cashbackAmount || 0) + (r.socialAmount || 0);
+        document.getElementById('sim-result').style.display = 'block';
+        document.getElementById('sim-result').innerHTML = `
+          <div class="result-row"><span class="result-label">Cashback (${r.cashbackPercent || 5}%)</span><span class="result-value">₹${r.cashbackAmount || 0}</span></div>
+          <div class="result-row"><span class="result-label">Social Bonus</span><span class="result-value">₹${r.socialAmount || 0}</span></div>
+          <div class="result-row" style="font-weight:700;padding-top:12px;border-top:1px solid #d0d0d0">
+            <span>Total Earnings</span><span style="color:#34c759">₹${total}</span>
+          </div>
+        `;
+      } catch { document.getElementById('sim-result').innerHTML = '<p class="error">Connect to REE service</p>'; }
+    }
+
+    async function createRule() {
+      const name = document.getElementById('rule-name').value;
+      const type = document.getElementById('rule-type').value;
+      const category = document.getElementById('rule-category').value;
+      const priority = parseInt(document.getElementById('rule-priority').value) || 10;
+      const coinType = document.getElementById('coin-type').value;
+      const formula = document.getElementById('rule-formula').value;
+      if (!name || !category) { alert('Fill required fields'); return; }
+      try {
+        await fetch(REE + '/admin/rules', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ruleType: type,
+            category,
+            priority,
+            conditions: [],
+            actions: [{ actionType: 'credit_coin', params: { coinType, formula }],
+            effectiveFrom: new Date()
+          })
+        });
+        alert('Rule created (mock)');
+        showTab('rules');
+      } catch { alert('Error - is REE running?'); }
+    }
+
+    loadRules();
+  </script>
+</body>
+</html>
