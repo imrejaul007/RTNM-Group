@@ -1,4 +1,4 @@
-# ReZ Admin Service
+# REZ API Docs
 
 ## Description
 

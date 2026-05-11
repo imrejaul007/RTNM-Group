@@ -1,4 +1,4 @@
-# ReZ Admin Service
+# ReZ Loyalty Admin
 
 ## Description
 

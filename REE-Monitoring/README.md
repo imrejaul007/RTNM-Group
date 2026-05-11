@@ -1,4 +1,4 @@
-# ReZ Admin Service
+# REE Monitoring
 
 ## Description
 
