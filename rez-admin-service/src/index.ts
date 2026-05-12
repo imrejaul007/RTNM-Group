@@ -52,26 +52,47 @@ interface AuditLog {
 const adminUsers: Map<string, AdminUser> = new Map();
 const auditLogs: AuditLog[] = [];
 
-// JWT Secret
-const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-in-production';
+// RABTUL: Use centralized auth service
+const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || 'https://rez-auth-service.onrender.com';
+const INTERNAL_SERVICE_TOKEN = process.env.INTERNAL_SERVICE_TOKEN || '';
 const JWT_EXPIRES_IN = '24h';
 
 // Helper functions
-const generateToken = (user: AdminUser): string => {
-  return jwt.sign(
+const generateToken = async (user: AdminUser): Promise<string> => {
+  // For admin users, we still generate JWT locally since admins are managed separately
+  // But we verify against RABTUL for user tokens
+  const token = jwt.sign(
     { userId: user.id, email: user.email, role: user.role },
-    JWT_SECRET,
+    process.env.JWT_SECRET || 'dev-secret-change-in-production',
     { expiresIn: JWT_EXPIRES_IN }
   );
+  return token;
 };
 
-const verifyToken = (req: Request): { userId: string; email: string; role: string } | null => {
+const verifyToken = async (req: Request): Promise<{ userId: string; email: string; role: string } | null> => {
   const authHeader = req.headers.authorization;
   if (!authHeader?.startsWith('Bearer ')) return null;
 
   try {
     const token = authHeader.substring(7);
-    return jwt.verify(token, JWT_SECRET) as { userId: string; email: string; role: string };
+    // RABTUL: Verify token via auth service
+    const response = await fetch(`${AUTH_SERVICE_URL}/api/auth/verify`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Internal-Token': INTERNAL_SERVICE_TOKEN,
+      },
+      body: JSON.stringify({ token }),
+    });
+
+    if (response.ok) {
+      const result = await response.json();
+      if (result.success && result.user) {
+        return { userId: result.user.id, email: result.user.email || '', role: result.user.role || 'user' };
+      }
+    }
+    // Fallback to local verification if RABTUL is unavailable
+    return jwt.verify(token, process.env.JWT_SECRET || 'dev-secret-change-in-production') as { userId: string; email: string; role: string };
   } catch {
     return null;
   }
