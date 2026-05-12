@@ -1,172 +1,311 @@
-# REZ QR ECOSYSTEM - COMPLETE DOCUMENTATION
-
-**Date:** May 11, 2026  
+# REZ QR ECOSYSTEM - COMPLETE SOT
+**Date:** May 12, 2026  
 **Status:** COMPLETE
 
 ---
 
-## 6 QR SYSTEMS
+## QR SERVICES OVERVIEW
 
-| QR Type | Company | Repo | Service |
-|---------|---------|------|---------|
-| **Verify QR** | RTNM-Group | RTNM-Group | verify-service |
-| **ReZ Now QR** | REZ-Consumer | REZ-Consumer | rez-now |
-| **Menu QR** | REZ-Consumer | REZ-Consumer | rez-web-menu |
-| **Creator QR** | REZ-Media | REZ-Media | adsqr |
-| **Room QR** | StayOwn | StayOwn | verify-service |
-| **Shelf QR** | REZ-Media | REZ-Media | adsqr (shelf module) |
+| QR Type | Company | Service | Tech | Purpose |
+|---------|---------|---------|------|---------|
+| **Verify Product** | REZ-Consumer | verify-qr-service | Node.js | Product warranty |
+| **ReZ Now** | REZ-Consumer | rez-now | Next.js | Instant commerce |
+| **Menu QR** | REZ-Consumer | rez-web-menu | Next.js | Restaurant menu |
+| **AdQR** | REZ-Media | adsqr | Node.js | Ad campaigns |
+| **Shelf QR** | REZ-Media | rez-shelf-qr | Node.js | Product scanning |
+| **Creator QR** | REZ-Media | creators | Next.js | Influencer links |
+| **Room QR** | StayOwn | verify-service | Next.js | Hotel room access |
 
 ---
 
-## QR SYSTEM ARCHITECTURE
+## QR FLOW DIAGRAM
 
 ```
-┌─────────────────────────────────────────────────────────────┐
+┌─────────────────────────────────────────────────────────────────────┐
 │ REZ QR ECOSYSTEM │
-├─────────────────────────────────────────────────────────────┤
+├─────────────────────────────────────────────────────────────────────┤
 │ │
-│ VERIFY QR ────────── RTNM-Group ─── Product verification │
+│ VERIFY QR ─────────── REZ-Consumer ─── Product warranty │
+│ ├── Scan QR ──── Verify authenticity │
+│ ├── Activate ──── Link to customer │
+│ ├── Warranty ──── Track expiry │
+│ └── Claim ─────── File warranty claim │
 │ │
-│ SCAN QR ────────── REZ-Consumer ─── Shopping experience │
-│ ├── ReZ Now QR ──────────── Instant commerce │
-│ └── Menu QR ────────────── Restaurant menu │
+│ COMMERCE QR ─────── REZ-Consumer ─── Shopping │
+│ ├── ReZ Now ──── Instant buy │
+│ └── Menu QR ───── Restaurant/hotel menu │
 │ │
-│ ENGAGE QR ────────── REZ-Media ───── Marketing │
-│ ├── AdQR ──────────────── Ad campaigns │
-│ └── Shelf QR ──────────── Product discovery │
+│ AD QR ────────── REZ-Media ───── Marketing │
+│ ├── AdQR ─────── Campaign tracking │
+│ ├── Shelf QR ─── Product discovery │
+│ └── Creator QR ── Influencer links │
 │ │
-│ ROOM QR ─────────── StayOwn ────── Hospitality │
-│ └── Hotel room QR ──────── Smart room access │
+│ HOTEL QR ───────── StayOwn ───────── Hospitality │
+│ └── Room QR ───── Smart room access │
 │ │
-└─────────────────────────────────────────────────────────────┘
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 1. VERIFY QR (RTNM-Group)
+## 1. VERIFY PRODUCT QR
+**Company:** REZ-Consumer  
+**Service:** verify-qr-service  
+**Tech:** Node.js + MongoDB
 
-**Purpose:** Product/service verification and authenticity
+### Purpose
+Product authenticity verification + warranty activation
 
-**Use Cases:**
-- Product authenticity check
-- Service verification
-- Document verification
-- License validation
-
-**Tech Stack:** Node.js, QR scanner
-
-**Endpoints:**
+### Flow
 ```
-/verify/:qr_code
-/verify/batch
-/report-fake/:product_id
-```
-
-**Database:** MongoDB (verifications collection)
-
----
-
-## 2. ReZ Now QR (REZ-Consumer)
-
-**Purpose:** Instant commerce - scan QR → buy instantly
-
-**Use Cases:**
-- Scan product QR → Add to cart
-- Social commerce
-- Quick purchase
-- Affiliate links
-- Campaign tracking
-
-**Tech Stack:** Next.js, Vercel
-
-**Flow:**
-```
-QR Scan → Product Lookup → Add to Cart → Payment → Confirmation
+Customer buys product
+     ↓
+Scans QR on product
+     ↓
+Verify authenticity (checks product database)
+     ↓
+"Activate Warranty" button
+     ↓
+Enter: Name, Phone, Email
+     ↓
+Warranty activated
+     ↓
+Customer gets warranty card QR
+     ↓
+File claim anytime
 ```
 
-**URL:** https://rez-now.vercel.app
+### Features
+- [x] Product verification
+- [x] Warranty activation
+- [x] Customer dashboard
+- [x] Claim filing
+- [x] Expiry tracking
+- [x] QR code generation
 
----
-
-## 3. Menu QR (REZ-Consumer)
-
-**Purpose:** Digital restaurant/hotel menu
-
-**Use Cases:**
-- Restaurant menu browsing
-- Hotel room service
-- Salon service list
-- Cafe menu
-
-**Tech Stack:** Next.js, Vercel
-
-**Flow:**
+### APIs
 ```
-QR Scan → Menu Display → Order → Payment
+POST /api/verify          - Verify product
+POST /api/activate-warranty - Activate warranty
+GET  /api/warranty/:serial - Get warranty status
+POST /api/claim           - File claim
 ```
 
-**URL:** https://rez-now.vercel.app/menu
+### Connected To
+- REZ-Merchant (product catalog)
+- REZ-Consumer (user profile)
+- MongoDB (warranty records)
 
----
-
-## 4. AdQR / Creator QR (REZ-Media)
-
-**Purpose:** Marketing campaigns and product discovery
-
-**Use Cases:**
-- Ad campaign tracking
-- Attribution tracking
-- Creator links
-- Affiliate marketing
-- Product discovery
-
-**Tech Stack:** Node.js, Render
-
-**Features:**
-- Campaign attribution
-- Creator tracking
-- Conversion analytics
-- A/B testing
-
-**URL:** https://adsqr.vercel.app
-
----
-
-## 5. Shelf QR (REZ-Media)
-
-**Purpose:** In-store product discovery
-
-**Use Cases:**
-- Shelf product scanning
-- Price comparison
-- Reviews/ratings
-- Add to cart
-
-**Tech Stack:** Node.js, Render
-
-**Flow:**
-```
-Shelf QR Scan → Product Details → Reviews → Add to Cart
+### Database
+```javascript
+Warranty: {
+  serial_number,
+  merchant_id,
+  user_id,
+  customer_name,
+  customer_phone,
+  customer_email,
+  purchase_date,
+  warranty_expiry_date,
+  warranty_status,
+  claims[]
+}
 ```
 
 ---
 
-## 6. Room QR (StayOwn-Hospitality)
+## 2. REZ NOW QR
+**Company:** REZ-Consumer  
+**Service:** rez-now  
+**Tech:** Next.js + Vercel
 
-**Purpose:** Smart hotel room access
+### Purpose
+Instant commerce - scan QR → buy now
 
-**Use Cases:**
-- Room key replacement
-- Digital check-in
-- Service requests
-- Checkout
-
-**Tech Stack:** Node.js, Render
-
-**Flow:**
+### Flow
 ```
-QR Scan → Room Unlock → Service Request
+Scan QR
+     ↓
+Product page
+     ↓
+Add to cart
+     ↓
+Payment
+     ↓
+Order confirmed
 ```
+
+### Features
+- [x] Product display
+- [x] Quick add to cart
+- [x] One-tap payment
+- [x] Order tracking
+- [x] Social sharing
+
+### URL
+https://rez-now.vercel.app
+
+---
+
+## 3. MENU QR
+**Company:** REZ-Consumer  
+**Service:** rez-web-menu  
+**Tech:** Next.js + Vercel
+
+### Purpose
+Digital restaurant/hotel menu via QR
+
+### Flow
+```
+Scan Menu QR
+     ↓
+Browse menu
+     ↓
+Order items
+     ↓
+Payment
+```
+
+### Features
+- [x] Menu display
+- [x] Categories
+- [x] Add to cart
+- [x] Order placement
+- [x] Dietary filters
+
+### URL
+https://rez-now.vercel.app/menu
+
+---
+
+## 4. ADQR
+**Company:** REZ-Media  
+**Service:** adsqr  
+**Tech:** Node.js + Vercel
+
+### Purpose
+Marketing campaign tracking + attribution
+
+### Flow
+```
+Creator/Brand creates campaign
+     ↓
+QR code generated
+     ↓
+Customer scans
+     ↓
+Attribution tracked
+     ↓
+Conversion measured
+```
+
+### Features
+- [x] Campaign management
+- [x] QR code generation
+- [x] Attribution tracking
+- [x] Conversion analytics
+- [x] Creator commission
+
+### URL
+https://adsqr.vercel.app
+
+---
+
+## 5. SHELF QR
+**Company:** REZ-Media  
+**Service:** rez-shelf-qr  
+**Tech:** Node.js + MongoDB
+
+### Purpose
+In-store product discovery
+
+### Flow
+```
+Scan product shelf QR
+     ↓
+Product details
+     ↓
+Reviews/Ratings
+     ↓
+Add to cart
+```
+
+### Features
+- [x] Product lookup
+- [x] Price display
+- [x] Reviews
+- [x] Stock check
+- [x] Add to cart
+
+### APIs
+```
+GET  /api/product/:id
+POST /api/scan
+GET  /api/qr/:code
+```
+
+---
+
+## 6. CREATOR QR
+**Company:** REZ-Media  
+**Service:** creators  
+**Tech:** Next.js + Vercel
+
+### Purpose
+Influencer content + affiliate links
+
+### Flow
+```
+Creator posts content
+     ↓
+QR/Link attached
+     ↓
+Fan scans
+     ↓
+Purchase tracked
+     ↓
+Commission credited
+```
+
+### Features
+- [x] Creator profiles
+- [x] Content management
+- [x] Affiliate tracking
+- [x] Commission dashboard
+- [x] QR generation
+
+### URL
+https://creators.vercel.app
+
+---
+
+## 7. ROOM QR
+**Company:** StayOwn-Hospitality  
+**Service:** verify-service  
+**Tech:** Next.js + Prisma
+
+### Purpose
+Smart hotel room access
+
+### Flow
+```
+Guest books room
+     ↓
+Gets Room QR
+     ↓
+Scan at door
+     ↓
+Room unlocks
+```
+
+### Features
+- [x] Room key replacement
+- [x] Digital check-in
+- [x] Service requests
+- [x] Checkout
+
+### URL
+https://stayown.vercel.app/verify
 
 ---
 
@@ -174,128 +313,119 @@ QR Scan → Room Unlock → Service Request
 
 ### URL Structure
 ```
-https://rez.app/verify/{code}          # Verify QR
-https://rez.app/scan/{product_id}       # ReZ Now QR
-https://rez.app/menu/{location_id}      # Menu QR
-https://rez.app/campaign/{campaign_id}    # AdQR
-https://rez.app/room/{room_id}           # Room QR
+REZ Now:     https://rez.app/now/{product_id}
+Menu:        https://rez.app/menu/{location_id}
+AdQR:        https://rez.app/c/{campaign_id}
+Shelf QR:    https://rez.app/shelf/{sku}
+Creator QR:   https://rez.app/creator/{creator_id}
+Room QR:     https://rez.app/room/{room_id}
+Verify:      https://rez.app/verify/{serial_number}
 ```
 
 ### QR Content Types
-| Type | Content | Example |
-|------|----------|---------|
-| Product | Product ID | `rez:product:SKU123` |
-| Menu | Location ID | `rez:menu:loc456` |
-| Campaign | Campaign ID | `rez:campaign:camp789` |
-| Room | Room ID | `rez:room:room101` |
-| Verify | Code | `rez:verify:ABC123` |
+```javascript
+{
+  "type": "product" | "menu" | "campaign" | "room" | "verify",
+  "id": "string",
+  "metadata": {}
+}
+```
 
 ---
 
-## DATA FLOW
+## DATA FLOW DIAGRAM
 
 ```
-QR CODE SCAN
-     │
-     ▼
-QR READER APP/WEB
-     │
-     ▼
-QR SERVICE (identify type)
-     │
-     ├─→ Verify Service ─→ Verification Result
-     │
-     ├─→ ReZ Now ─→ Product Lookup ─→ Cart ─→ Checkout
-     │
-     ├─→ Menu QR ─→ Menu API ─→ Display Menu
-     │
-     ├─→ AdQR ─→ Campaign Attribution ─→ Analytics
-     │
-     └─→ Room QR ─→ Hotel API ─→ Room Control
+QR SCAN
+    │
+    ├── Verify QR ──→ Check serial ──→ Verify product ──→ Show warranty
+    │
+    ├── ReZ Now ───→ Lookup product ──→ Add cart ──→ Checkout
+    │
+    ├── Menu QR ────→ Load menu ──────→ Order ──────→ Payment
+    │
+    ├── AdQR ──────→ Track campaign ──→ Record attribution
+    │
+    ├── Shelf QR ──→ Show product ───→ Reviews ────→ Cart
+    │
+    ├── Creator QR ─→ Track creator ──→ Commission
+    │
+    └── Room QR ───→ Validate room ───→ Unlock door
 ```
 
 ---
 
 ## ANALYTICS TRACKED
 
-| Metric | QR Type |
-|--------|---------|
-| Scans | All QR types |
-| Conversions | AdQR, ReZ Now |
+| Metric | QR Types |
+|--------|----------|
+| Scans | All |
+| Conversions | AdQR, ReZ Now, Shelf QR |
 | Revenue | ReZ Now, Menu QR |
-| Attribution | AdQR |
-| Engagement | All QR types |
-| Location data | Menu QR, Room QR |
+| Attribution | AdQR, Creator QR |
+| Engagement | All |
+| Room Access | Room QR |
+| Warranty Activations | Verify QR |
 
 ---
 
-## CAMPAIGN EXAMPLES
+## CONNECTIONS
 
-### AdQR Campaign
 ```
-QR Code → Campaign Landing → Product → Purchase → Attribution Report
-```
+verify-qr-service
+├── REZ-Merchant (product catalog)
+├── REZ-Consumer (user profile)
+├── MongoDB (warranty DB)
 
-### ReZ Now Campaign
-```
-QR on Product → Instant Purchase → Confirmation → Social Share
-```
+rez-now
+├── REZ-Merchant (products)
+├── REZ-Wallet (payment)
+├── REZ-Order (orders)
 
-### Menu Campaign
-```
-QR at Restaurant → Menu → Order → Review
+rez-web-menu
+├── REZ-Merchant (menu data)
+├── REZ-Order (orders)
+
+adsqr
+├── REZ-Analytics (attribution)
+├── REZ-Media (campaigns)
+
+rez-shelf-qr
+├── REZ-Merchant (products)
+├── REZ-Reviews
+
+creators
+├── REZ-Media (content)
+├── REZ-Analytics (commission)
+
+verify-service (StayOwn)
+├── REZ-Merchant (hotel rooms)
+├── REZ-Auth (guest access)
 ```
 
 ---
 
-## TECHNICAL SPECS
+## ENVIRONMENT VARIABLES
 
-### QR Generation
-```typescript
-interface QRPayload {
-  type: 'product' | 'menu' | 'campaign' | 'room' | 'verify';
-  id: string;
-  metadata?: Record<string, any>;
-}
-```
+```env
+# verify-qr-service
+MERCHANT_API_URL=https://rez-merchant.onrender.com
+AUTH_API=https://rez-auth.onrender.com
+MONGODB_URI=mongodb+srv://...
 
-### QR Scanner Integration
-```typescript
-interface ScanEvent {
-  qr_type: string;
-  qr_id: string;
-  user_id?: string;
-  location?: GeoLocation;
-  device_info: DeviceInfo;
-  timestamp: string;
-}
+# rez-shelf-qr
+MONGODB_URI=...
+
+# adsqr
+MONGODB_URI=...
 ```
 
 ---
 
 ## LAST UPDATED
+May 12, 2026
 
-May 11, 2026
-
-## SEE ALSO
-
-- [REZ-Consumer/README.md](../REZ-Consumer/README.md)
-- [REZ-Media/README.md](../REZ-Media/README.md)
-- [StayOwn-Hospitality/README.md](../StayOwn-Hospitality/README.md)
-- [RTNM-Group/README.md](../RTNM-Group/README.md)
-
-## QR SERVICES - FINAL MAPPING (Updated)
-
-| QR Type | Company | Service | Purpose |
-|---------|---------|---------|---------|
-| Verify Product QR | REZ-Consumer | verify-qr-service | Product warranty |
-| Room QR | StayOwn | verify-service | Hotel room access |
-| ReZ Now QR | REZ-Consumer | rez-now | Instant commerce |
-| Menu QR | REZ-Consumer | rez-web-menu | Restaurant menu |
-| AdQR | REZ-Media | adsqr | Ad campaigns |
-| Shelf QR | REZ-Media | rez-shelf-qr | Product scanning |
-| Creator QR | REZ-Media | creators | Influencer links |
-
-### Note
-- RTNM-Group handles internal admin only (warranty rules, merchant verification API)
-- REZ-Consumer handles client-facing (warranty activation, claims, dashboard)
+## OWNER
+- REZ-Consumer (Verify QR, ReZ Now, Menu QR)
+- REZ-Media (AdQR, Shelf QR, Creator QR)
+- StayOwn-Hospitality (Room QR)
