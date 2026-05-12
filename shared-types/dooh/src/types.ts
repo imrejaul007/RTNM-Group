@@ -1,6 +1,9 @@
 /**
  * DOOH - Digital Out of Home Advertising Network
  * Screen management, ad delivery, and playlist generation
+ *
+ * This is the CANONICAL source for DOOH types.
+ * Import from this package: @rez/dooh-shared
  */
 
 // ============================================================================
@@ -8,20 +11,47 @@
 // ============================================================================
 
 /**
- * Screen types in the network
+ * Screen types in the DOOH network
  */
 export type ScreenType =
+  // Ground Transport
   | 'cab_tablet'
+  | 'bus_shelter'
+  | 'bus_interior'
+  | 'train_display'
+  | 'metro_screen'
+  // Aviation
+  | 'flight_seatback'
+  | 'flight_overhead'
+  | 'flight_entrance'
+  | 'flight_lavatory'
+  // Airports
+  | 'airport_display'
+  | 'airport_kiosk'
+  | 'airport_gate'
+  | 'airport_lounge'
+  | 'airport_billboard'
+  // Hospitality
   | 'restaurant_tv'
+  | 'hotel_lobby'
+  | 'hotel_room'
+  // Retail
   | 'mall_kiosk'
+  | 'mall_directory'
   | 'gym_screen'
   | 'salon_display'
-  | 'hotel_lobby'
-  | 'airport_display'
+  // Office
   | 'office_lobby'
-  | 'bus_shelter'
+  | 'office_elevator'
+  // Street
   | 'billboard_digital'
+  // Generic
   | 'generic_display'
+
+/**
+ * Screen network classification
+ */
+export type ScreenNetworkType = '1:1' | 'mass'
 
 /**
  * Screen status
@@ -32,15 +62,12 @@ export type ScreenStatus = 'active' | 'inactive' | 'offline' | 'maintenance'
  * Screen location types
  */
 export type LocationType =
-  | 'cab'
-  | 'restaurant'
-  | 'mall'
-  | 'gym'
-  | 'salon'
-  | 'hotel'
-  | 'airport'
-  | 'office'
-  | 'street'
+  | 'cab' | 'bus' | 'train' | 'metro'
+  | 'flight' | 'airport_terminal' | 'airport_gate' | 'airport_lounge'
+  | 'restaurant' | 'hotel' | 'hospital'
+  | 'mall' | 'gym' | 'salon' | 'retail'
+  | 'office' | 'coworking'
+  | 'street' | 'highway'
   | 'other'
 
 /**

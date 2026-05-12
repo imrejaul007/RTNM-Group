@@ -1,7 +1,7 @@
 # SOT - MASTER INDEX - MAY 12, 2026
 
-**Version:** 7.0  
-**Status:** COMPLETE + NEW FEATURES
+**Version:** 8.0  
+**Status:** COMPLETE PLATFORM
 
 ---
 
@@ -19,6 +19,8 @@
 | 8 | **CorpPerks** | Enterprise | imrejaul007/CorpPerks |
 | 9 | **RTNM-Digital** | Trust + Operations | imrejaul007/RTNM-Digital |
 
+**TOTAL: 170+ Services | 14 Apps**
+
 ---
 
 ## PLATFORM ARCHITECTURE
@@ -29,7 +31,7 @@
 ├─────────────────────────────────────────────────────────────────────┤
 │ │
 │ IDENTITY CLOUD │
-│ Auth │ Access Control │ Identity │ Trust │
+│ Auth │ Access Control │ Identity │ Trust │ Privacy │
 │ │
 │ PAYMENTS CLOUD │
 │ Wallet │ Ledger │ Settlements │ BNPL │ Capital │
@@ -39,9 +41,14 @@
 │ │
 │ INTELLIGENCE CLOUD │
 │ Intent Graph │ Attribution │ Recommendation │ Personalization │
+│ Consumer Graph │ Merchant 360 │ MIND │
 │ │
 │ CONSUMER INTELLIGENCE │
-│ REZ-Scan │ REZ-Expense │ REZ-Assistant │ REZ-Save │
+│ REZ-Scan │ REZ-Expense │ REZ-Bills │ REZ-Assistant │
+│ REZ-Save │ REZ-Nearby │ REZ-Inbox │
+│ │
+│ GROWTH │
+│ Attribution Platform │ AI Referral Graph │ Privacy Layer │
 │ │
 │ ENGAGEMENT CLOUD │
 │ Loyalty │ Offers │ Gamification │ Referrals │
@@ -49,14 +56,14 @@
 │ AD CLOUD │
 │ AdBazaar │ DOOH │ Creator Network │
 │ │
-│ QR ECOSYSTEM │
+│ QR ECOSYSTEM (6 Types) │
 │ Verify QR │ AdQR │ Shelf QR │ Creator QR │ Menu QR │ Room QR │
 │ │
 │ INDUSTRY OS │
 │ Restaurant │ Hotel │ Salon │ Fitness │
 │ │
 │ TRUST CLOUD │
-│ Fraud │ Risk │ AML │ Compliance │ REZ-Trust │
+│ Fraud │ Risk │ AML │ Compliance │
 │ │
 │ OPERATIONS │
 │ Workflow │ Incidents │ Secrets │ Developer Platform │
@@ -66,138 +73,184 @@
 
 ---
 
-## REZ-Consumer (Consumer Apps)
+## SERVICE COUNTS
 
-### NEW Intelligence Services
+| Company | Services | Apps | Total |
+|---------|----------|------|-------|
+| RTNM-Group | 11 | 1 | 12 |
+| RABTUL-Technologies | 30+ | - | 30 |
+| REZ-Intelligence | 67+ | - | 67 |
+| REZ-Media | 25+ | 2 | 27 |
+| REZ-Merchant | 10+ | 2 | 12 |
+| REZ-Consumer | 15+ | 6 | 21 |
+| StayOwn-Hospitality | 7+ | 1 | 8 |
+| CorpPerks | 6+ | 1 | 7 |
+| RTNM-Digital | 2 | - | 2 |
 
-| Service | Purpose | Integrations |
-|---------|---------|--------------|
-| **REZ-scan** | Universal QR Scanner | Intent-Graph, verify-qr |
-| **REZ-expense** | Receipt Scanner | Analytics, Merchant |
-| **REZ-assistant** | Consumer AI Chat | REZ-Mind, Intent-Graph |
-| **REZ-save** | Wishlist | Intelligence, Agent |
-| **REZ-inbox** | Email Import | Analytics |
-| **REZ-nearby** | Classifieds | Intelligence |
-| **REZ-bills** | Smart Receipt Scanner | Wallet, verify-qr |
-
-### Existing Apps
-
-| Service | Purpose |
-|---------|---------|
-| verify-qr-service | Product warranty |
-| rez-now | Instant commerce |
-| rez-web-menu | Restaurant menu |
-| Rendez | Consumer app |
-| do-app | AI assistant |
-| rez-karma-app | Karma giving |
-
-### Mobile Apps
-
-| App | Purpose |
-|-----|---------|
-| REZ-scan-ui | QR scanning |
-| REZ-expense-ui | Receipt capture |
-| REZ-assistant-ui | AI chat |
-| REZ-save-ui | Wishlists |
+**TOTAL: 170+ Services**
 
 ---
 
 ## RTNM-Group (Controls + Financial)
 
-### NEW Trust Services
+### Trust Services
+| Service | Purpose |
+|---------|---------|
+| REZ-trust-service | Trust/Reputation |
+| REZ-trust-admin | Trust Dashboard |
 
-| Service | Purpose | Integrations |
-|---------|---------|--------------|
-| **REZ-trust-service** | Trust/Reputation | BNPL, Fraud, verify-qr |
-| **REZ-trust-admin** | Trust Dashboard | All services |
+### Financial Services
+| Service | Purpose |
+|---------|---------|
+| REZ-bnpl-service | Buy Now Pay Later |
+| REZ-capital-service | Capital financing |
+| REZ-financial-ledger-platform | Revenue, Settlements |
 
-### Existing Services
-
+### Access & Compliance
 | Service | Purpose |
 |---------|---------|
 | REZ-access-control-service | RBAC/ABAC |
+| REZ-central-permissions | Central RBAC |
 | REZ-compliance-platform | GDPR, DPDP |
-| REZ-financial-ledger-platform | Revenue, Settlements |
-| REZ-identity-service | Identity |
-| REZ-central-permissions | Central RBAC/ABAC |
-| REZ-bnpl-service | Buy Now Pay Later |
-| REZ-capital-service | Capital financing |
 
-### Privacy Services
+---
 
+## RABTUL-Technologies (Infrastructure)
+
+### Core Services (30+)
 | Service | Purpose |
 |---------|---------|
-| **REZ-privacy-layer** | Transaction masking |
+| api-gateway | API routing |
+| rez-auth-service | JWT, OAuth, MFA |
+| rez-payment-service | Razorpay, Stripe |
+| rez-wallet-service | Digital wallet |
+| rez-order-service | Order management |
+| rez-catalog-service | Product catalog |
+| rez-search-service | Search |
+| rez-profile-service | User profiles |
+| rez-booking-service | Bookings |
+| rez-delivery-service | Delivery |
+| rez-analytics-service | Analytics |
+| rez-notifications-service | Push, SMS, Email |
+| REZ-privacy-layer | Transaction masking |
+| REZ-circuit-breaker | Resilience |
+| REZ-retry-service | BullMQ retry |
 
 ---
 
 ## REZ-Intelligence (AI/ML Platform)
 
-### Core AI
-
+### Core AI (10+)
 | Service | Purpose |
 |---------|---------|
 | REZ-MIND | Core AI brain |
-| REZ-action-engine | Action execution |
 | REZ-agent-orchestrator | Multi-agent coordination |
+| REZ-autonomous-agents | Autonomous agents |
 
-### Intelligence
-
+### Identity & Graph (10+)
 | Service | Purpose |
 |---------|---------|
-| REZ-intent-graph | User intent tracking |
-| REZ-consumer-graph | Unified consumer identity |
-| REZ-merchant-360 | Unified merchant identity |
+| REZ-identity-graph | Identity resolution |
+| REZ-consumer-graph | Consumer identity |
+| REZ-merchant-360 | Merchant identity |
+| REZ-intent-graph | Intent tracking |
+
+### Intelligence (15+)
+| Service | Purpose |
+|---------|---------|
 | REZ-personalization-engine | Personalization |
 | REZ-recommendation-engine | Recommendations |
+| REZ-attribution-system | Attribution |
+| REZ-ab-testing-service | A/B testing |
+| REZ-cdp-service | Customer Data Platform |
 
-### Data
-
+### Data & Analytics (15+)
 | Service | Purpose |
 |---------|---------|
 | REZ-data-platform | Data lake |
-| REZ-stream-processing | Kafka streaming |
-| REZ-cdp-service | Customer Data Platform |
+| REZ-stream-processing | Kafka |
 | REZ-feature-store | ML features |
-
-### Analytics
-
-| Service | Purpose |
-|---------|---------|
-| REZ-analytics-orchestrator | Cross-platform analytics |
-| REZ-attribution-system | Attribution tracking |
-| REZ-ab-testing-service | A/B testing |
-| **REZ-attribution-platform** | Offline attribution |
 
 ---
 
 ## REZ-Media (Engagement)
 
-### NEW Growth Services
-
-| Service | Purpose | Integrations |
-|---------|---------|--------------|
-| **REZ-attribution-platform** | Offline attribution | scan, payments |
-| **REZ-referral-graph** | AI referral network | wallet, intelligence |
-| **REZ-attribution-dashboard** | Attribution dashboard | - |
-| **REZ-referral-dashboard** | Referral dashboard | - |
-
-### Existing Services
-
+### Growth Services
 | Service | Purpose |
 |---------|---------|
-| REZ-ads-service | Ads API |
-| REZ-ad-ai | AI optimization |
+| REZ-attribution-platform | Offline attribution |
+| REZ-attribution-dashboard | Attribution dashboard |
+| REZ-referral-graph | AI referral network |
+| REZ-referral-dashboard | Referral dashboard |
+
+### Ad Platform
+| Service | Purpose |
+|---------|---------|
 | AdBazaar | Ad marketplace |
 | adsqr | QR ads |
+| REZ-ads-service | Ads API |
+| REZ-ad-ai | AI optimization |
+
+### Creator & Engagement
+| Service | Purpose |
+|---------|---------|
+| creators | Creator platform |
+| REZ-gamification-service | Points, badges |
+| REZ-engagement-platform | Loyalty |
 
 ---
 
-## QR ECOSYSTEM
+## REZ-Merchant (Industry OS)
 
-| QR Type | Company | Service | Purpose |
-|---------|---------|---------|---------|
-| Verify Product | REZ-Consumer | verify-qr-service | Product warranty |
+### Core Services
+| Service | Purpose |
+|---------|---------|
+| REZ-dashboard | Merchant dashboard |
+| rez-merchant-service | Merchant API |
+| rez-merchant-copilot | Merchant AI |
+| industry-os | Restaurant, Hotel, Salon |
+
+---
+
+## REZ-Consumer (Consumer Apps)
+
+### Intelligence Services (8)
+| Service | Purpose |
+|---------|---------|
+| REZ-scan | QR Scanner |
+| REZ-expense | Receipt Scanner |
+| REZ-bills | Smart Receipts + Cashback |
+| REZ-assistant | AI Chat |
+| REZ-save | Wishlist |
+| REZ-nearby | Classifieds |
+| REZ-inbox | Email Import |
+| verify-qr-service | Product Warranty |
+
+### Commerce Apps
+| Service | Purpose |
+|---------|---------|
+| rez-now | Instant commerce |
+| rez-web-menu | Restaurant menu |
+| Rendez | Consumer app |
+| do-app | AI assistant |
+
+### Mobile Apps (6)
+| App | Purpose |
+|-----|---------|
+| REZ-scan-ui | QR scanning |
+| REZ-expense-ui | Expense |
+| REZ-assistant-ui | AI chat |
+| REZ-save-ui | Wishlists |
+| REZ-bills-ui | Smart receipts |
+| REZ-nearby-ui | Classifieds |
+
+---
+
+## QR ECOSYSTEM (6 Types)
+
+| QR | Company | Service | Purpose |
+|----|---------|---------|---------|
+| Verify | REZ-Consumer | verify-qr-service | Product warranty |
 | AdQR | REZ-Media | adsqr | Ad campaigns |
 | Shelf QR | REZ-Media | rez-shelf-qr | Product scanning |
 | Creator QR | REZ-Media | creators | Influencer links |
@@ -208,72 +261,151 @@
 
 ## DATA MOAT LAYERS
 
-### What We Now Track
-
 | Layer | Data | Service |
 |-------|------|---------|
-| **Online Intent** | Searches, views, clicks | REZ-assistant |
-| **Offline Behavior** | Store visits, QR scans | REZ-scan |
-| **External Spend** | Receipts, invoices | REZ-expense |
-| **Future Intent** | Wishlists, saves | REZ-save |
-| **Travel Plans** | Email imports | REZ-inbox |
-| **Trust Scores** | User/Merchant reputation | REZ-trust-service |
-| **Ownership** | Product warranty | verify-qr-service |
+| Online Intent | Searches, chats | REZ-assistant |
+| Offline Behavior | QR scans, visits | REZ-scan |
+| External Spend | Bills, receipts | REZ-bills, REZ-expense |
+| Attribution | Ad → Visit → Purchase | REZ-attribution |
+| Referral Network | Quality users | REZ-referral |
+| Trust | User/Merchant scores | REZ-trust |
+| Privacy | User-controlled masking | REZ-privacy |
+| Ownership | Product warranty | verify-qr |
 
 ---
 
-## SERVICE COUNTS
+## CROSS-PLATFORM FLOWS
 
-| Company | Services | Apps |
-|---------|----------|------|
-| RTNM-Group | 20+ | 1 |
-| RABTUL-Technologies | 24+ | - |
-| REZ-Intelligence | 51+ | - |
-| REZ-Media | 25+ | 3 |
-| REZ-Merchant | 10+ | 2 |
-| REZ-Consumer | 15+ | 6 |
-| StayOwn-Hospitality | 7+ | 1 |
-| CorpPerks | 6+ | 1 |
-| RTNM-Digital | 2+ | - |
+### 1. Registration → Wallet → Order
+```
+Auth → Wallet → Profile → Order → Payment → Notification
+```
 
-**TOTAL: 160+ Services**
+### 2. QR Scan → Verify → Warranty → Cashback
+```
+Scan → Verify → Activate → Link → Cashback → Notify
+```
+
+### 3. Bill Scan → Extract → Cashback → Tax
+```
+Scan → OCR → Extract → Cashback → Tax Record
+```
+
+### 4. Referral → Quality Score → Reward → Network
+```
+Invite → Signup → Quality → Reward → Network
+```
+
+### 5. Ad → Attribution → ROI
+```
+Campaign → QR Display → Scan → Visit → Purchase → Report
+```
 
 ---
 
 ## INTEGRATION MATRIX
 
 ```
-REZ-Consumer Services ───→ REZ-Intelligence
+REZ-Consumer ───→ REZ-Intelligence
+├── verify-qr ───→ Intent Graph
+├── REZ-bills ───→ Analytics
+├── REZ-assistant ───→ MIND
 ├── REZ-scan ───→ Intent Graph
-├── REZ-expense ───→ Analytics
-├── REZ-assistant ───→ REZ-Mind
-├── REZ-save ───→ Intelligence
-└── verify-qr ───→ Merchant
+└── REZ-save ───→ Intelligence
 
-RTNM-Group ───→ REZ-Trust
-├── REZ-bnpl ───→ Trust scores
-├── REZ-capital ───→ Credit scoring
-└── verify-qr ───→ Ownership
+REZ-Media ───→ REZ-Intelligence
+├── Attribution ───→ Attribution
+├── Referral ───→ Intent Graph
+└── Wallet ───→ Intelligence
+
+RTNM-Group ───→ RABTUL
+├── Trust ───→ BNPL
+├── Trust ───→ Capital
+└── Trust ───→ Privacy
+
+All Services ───→ Auth (JWT)
+All Services ───→ Wallet (Payments)
+All Services ───→ Notifications (Alerts)
 ```
 
 ---
 
-## ENVIRONMENT VARIABLES TEMPLATE
+## ENVIRONMENT VARIABLES
 
 ```env
-# REZ-Consumer
+# RABTUL-Technologies
+AUTH_API=https://rez-auth.onrender.com
+WALLET_API=https://rez-wallet.onrender.com
+PAYMENT_API=https://rez-payment.onrender.com
+NOTIF_API=https://rez-notifications.onrender.com
+PRIVACY_API=https://rez-privacy.onrender.com
+
+# REZ-Intelligence
+MIND_API=https://REZ-mind.onrender.com
 INTENT_API=https://rez-intent-graph.onrender.com
+CDP_API=https://rez-cdp.onrender.com
+
+# REZ-Consumer
 VERIFY_API=https://rez-verify-qr.onrender.com
 AGENT_API=https://REZ-agent.onrender.com
-ANALYTICS_API=https://rez-analytics.onrender.com
-MIND_API=https://REZ-mind.onrender.com
+SCAN_API=https://rez-scan.onrender.com
+
+# REZ-Media
+ATTR_API=https://rez-attribution.onrender.com
+REFERRAL_API=https://rez-referral.onrender.com
 
 # RTNM-Group
 TRUST_API=https://rez-trust.onrender.com
+BNPL_API=https://rez-bnpl.onrender.com
 ```
+
+---
+
+## DOCUMENTATION
+
+| Document | Location |
+|----------|----------|
+| Master SOT | RTNM-Group/SOT/MASTER_INDEX.md |
+| Integration Tests | CROSS_CONNECTION_TESTS.md |
+| Final Documentation | FINAL_DOCUMENTATION.md |
+| QR Ecosystem | RTNM-Group/SOT/QR_SERVICES.md |
+| Verify QR Audit | RTNM-Group/SOT/VERIFY_QR_AUDIT.md |
+
+---
+
+## DEPLOYMENT
+
+| Platform | Services | Apps |
+|----------|----------|------|
+| Render | 170+ | - |
+| Vercel | - | 14+ |
+| MongoDB Atlas | Primary DB | - |
+| Redis Cloud | Cache, Queues | - |
+
+---
+
+## TESTING
+
+| Type | Tests |
+|------|-------|
+| Unit Tests | 500+ |
+| Integration Tests | 243+ |
+| Connection Tests | 135+ |
+| E2E Tests | 50+ |
 
 ---
 
 ## LAST UPDATED
 
 May 12, 2026
+
+---
+
+## VERSION HISTORY
+
+| Version | Date | Changes |
+|---------|------|---------|
+| 8.0 | May 12, 2026 | Complete platform documentation |
+| 7.0 | May 12, 2026 | Added Attribution, Referral, ReZ Bills |
+| 6.0 | May 12, 2026 | Added new Consumer services |
+| 5.0 | May 11, 2026 | Initial platform build |

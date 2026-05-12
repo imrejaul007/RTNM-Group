@@ -6,6 +6,15 @@
 // Re-export types
 export * from './types'
 
+// Re-export schemas (Zod validation)
+export * from './schemas'
+
+// Re-export state machine validation
+export * from './state-machines'
+
+// Re-export money utilities
+export * from './money'
+
 // Re-export services
 export { createPlaylistGenerator } from './services/playlist.service'
 export { createDeliveryEngine, createRevenueCalculator } from './services/delivery.service'

@@ -1,16 +1,65 @@
-# DOOH - Digital Out of Home Advertising Network
+# @rez/dooh-shared
+
+**Canonical DOOH (Digital Out of Home) Type Definitions**
 
 > **"Turn every screen into a smart advertising channel."**
 
----
-
-## What is DOOH?
-
-DOOH connects **physical screens** to **AdOS intelligence** for real-time ad delivery.
+This is the single source of truth for all DOOH-related types, validation schemas, and utilities used across the ReZ platform.
 
 ---
 
-## System Architecture
+## Installation
+
+```bash
+npm install @rez/dooh-shared
+```
+
+## Usage
+
+```typescript
+import {
+  // Types
+  Screen,
+  DOOHCampaign,
+  ScreenFilter,
+  DeliveryRequest,
+
+  // Schemas (for validation)
+  ScreenRegistrationSchema,
+  ScreenHeartbeatSchema,
+  DeliveryRequestSchema,
+
+  // State machines
+  isValidScreenStatusTransition,
+  assertValidCampaignStatusTransition,
+
+  // Money utilities
+  money,
+  calculateCPMCost,
+  formatMoney,
+} from '@rez/dooh-shared';
+```
+
+---
+
+## Package Structure
+
+```
+dooh/
+├── src/
+│   ├── types.ts          # All type definitions (CANONICAL)
+│   ├── schemas.ts        # Zod validation schemas
+│   ├── state-machines.ts # Status transition validation
+│   ├── money.ts          # Financial calculations
+│   ├── index.ts          # Package exports
+│   └── services/         # Core services
+├── package.json
+└── README.md
+```
+
+---
+
+## Ecosystem Overview
 
 ```
 ReZ Mind (Context Signals)
@@ -19,14 +68,15 @@ AdOS (Decision Engine)
         ↓
 DOOH Services
         ↓
-┌─────────────────────────────┐
-│  Screen Network           │
-│  ├── Cab Tablets         │
-│  ├── Restaurant TVs     │
-│  ├── Mall Kiosks        │
-│  ├── Gym Screens        │
-│  └── Digital Billboards │
-└─────────────────────────────┘
+┌─────────────────────────────────────────┐
+│           Screen Network                │
+│  ├── Cab Tablets                       │
+│  ├── Restaurant TVs                   │
+│  ├── Mall Kiosks                      │
+│  ├── Gym Screens                      │
+│  ├── Airport Displays                 │
+│  └── Digital Billboards               │
+└─────────────────────────────────────────┘
         ↓
 User Interaction (QR / Visit)
         ↓
@@ -35,7 +85,57 @@ Attribution → AdOS
 
 ---
 
-## Screen Types Supported
+## Type Categories
+
+### Screen Types
+
+| Type | Description |
+|------|-------------|
+| `ScreenType` | 25+ screen types (cab, bus, flight, airport, hotel, etc.) |
+| `ScreenStatus` | active, inactive, offline, maintenance |
+| `ScreenNetworkType` | '1:1' (personalized) or 'mass' (broadcast) |
+| `Screen` | Full screen entity with location, hardware, earnings |
+| `ScreenRegistration` | Registration request payload |
+| `ScreenHeartbeat` | Screen health ping with playlist version |
+| `ScreenHealth` | Health status with uptime, connection quality |
+
+### Campaign Types
+
+| Type | Description |
+|------|-------------|
+| `DOOHCampaign` | Full campaign entity |
+| `Creative` | Ad creative (image, video, html5, interactive, audio) |
+| `DOOHTargeting` | Targeting configuration (location, audience, time) |
+| `CampaignMetrics` | Performance metrics (impressions, scans, visits) |
+
+### Playlist Types
+
+| Type | Description |
+|------|-------------|
+| `Playlist` | Screen playlist with version |
+| `PlaylistSlot` | Individual slot with timing |
+| `PlaylistRequest` | Generation request |
+
+### Delivery Types
+
+| Type | Description |
+|------|-------------|
+| `DeliveryRequest` | Ad delivery request with context |
+| `DeliveryContext` | Context for ad decision (time, weather, audience) |
+| `DeliveryResponse` | Delivery result with ranked slots |
+
+### Revenue Types
+
+| Type | Description |
+|------|-------------|
+| `Money` | Amount in smallest unit + currency (no floating point) |
+| `RevenueModel` | CPM, slot, performance, or hybrid |
+| `RevenueShare` | Owner/platform/provider split |
+| `PayoutRecord` | Payout tracking |
+
+---
+
+## Screen Types
 
 | Type | Location | Audience | Best For |
 |------|----------|----------|----------|
@@ -45,93 +145,216 @@ Attribution → AdOS
 | `gym_screen` | Gyms | Fitness enthusiasts | Health, Supplements |
 | `salon_display` | Salons | Premium users | Beauty, Wellness |
 | `hotel_lobby` | Hotels | Travelers | Travel, Tourism |
+| `hotel_room` | Hotel rooms | Guests | Hospitality |
 | `airport_display` | Airports | Business travelers | Premium brands |
+| `airport_gate` | Airport gates | Travelers | Travel services |
 | `office_lobby` | Offices | Office workers | B2B, Services |
 | `bus_shelter` | Street | Commuters | Local businesses |
 | `billboard_digital` | Outdoor | General | Brand awareness |
 
 ---
 
-## Core Services
+## Validation Schemas
 
-### 1. Screen Manager
+All schemas are built with [Zod](https://zod.dev) for runtime validation:
+
 ```typescript
-import { createScreenManager } from './services/screen.service'
+import { ScreenRegistrationSchema, DeliveryRequestSchema } from '@rez/dooh-shared';
 
-const manager = createScreenManager()
-manager.register(screen)
-manager.updateStatus(screenId, 'active')
-const screens = manager.query({ type: 'cab_tablet', city: 'Bangalore' })
-```
-
-### 2. Delivery Engine
-```typescript
-import { createDeliveryEngine } from './services/delivery.service'
-
-const delivery = createDeliveryEngine()
-const ads = delivery.getAdsForScreen(request, screen, campaigns)
-```
-
-### 3. Playlist Generator
-```typescript
-import { createPlaylistGenerator } from './services/playlist.service'
-
-const generator = createPlaylistGenerator()
-const playlist = generator.generatePlaylist(request, screen, campaigns)
-```
-
----
-
-## Ad Decision Flow
-
-```
-1. Screen requests ads
-        ↓
-2. Delivery Engine filters eligible campaigns
-        ↓
-3. Rank by: audience + time + context
-        ↓
-4. Select top ads for slots
-        ↓
-5. Return playlist
-```
-
----
-
-## Audience Targeting
-
-| Segment | Typical Screens | Ad Categories |
-|---------|----------------|---------------|
-| Office workers | Cabs, Office lobbies | Fintech, Coffee, Delivery |
-| Families | Mall, Restaurants | Kids, Shopping, Food |
-| Fitness | Gym, Salon | Health, Supplements |
-| Travelers | Airport, Hotel | Travel, Tourism |
-| Foodies | Restaurants, Mall | Food, Delivery |
-
----
-
-## Context Signals (from ReZ Mind)
-
-```json
-{
-  "location_cluster": "IT workers",
-  "time_pattern": "morning commute",
-  "category_intent": ["food", "coffee"],
-  "density": "dense"
+// Validate incoming request
+const result = ScreenRegistrationSchema.safeParse(requestBody);
+if (!result.success) {
+  return res.status(400).json({
+    success: false,
+    error: 'Invalid input',
+    details: result.error.flatten(),
+  });
 }
+
+// Use validated data
+const screen = result.data;
+```
+
+### Available Schemas
+
+- `ScreenRegistrationSchema` - Screen registration validation
+- `ScreenFilterSchema` - Query parameter validation
+- `ScreenHeartbeatSchema` - Heartbeat validation
+- `DOOHCampaignSchema` - Campaign validation
+- `DeliveryRequestSchema` - Delivery request validation
+- `ImpressionEventSchema` - Analytics event validation
+- `ApiErrorResponseSchema` - Error response format
+
+---
+
+## State Machines
+
+Prevent invalid state transitions:
+
+```typescript
+import {
+  isValidScreenStatusTransition,
+  assertValidScreenStatusTransition,
+  isValidCampaignStatusTransition,
+  getAllowedScreenTransitions,
+} from '@rez/dooh-shared';
+
+// Check before transition
+if (isValidScreenStatusTransition(currentStatus, newStatus)) {
+  // Safe to transition
+} else {
+  return res.status(400).json({ error: 'Invalid transition' });
+}
+
+// Or throw on invalid
+assertValidScreenStatusTransition(currentStatus, newStatus);
+
+// Get allowed transitions
+const allowed = getAllowedScreenTransitions('active');
+// Returns: ['inactive', 'offline', 'maintenance']
+```
+
+### Screen Status Transitions
+
+```
+unregistered → pending → active → inactive → suspended
+                    ↘         ↘
+                     offline  maintenance
+```
+
+### Campaign Status Transitions
+
+```
+draft → active → paused → completed
+  ↘              ↘
+   budget_exhausted
 ```
 
 ---
 
-## Ad Targeting by Context
+## Money Utilities
 
-| Context | Example | Ads Shown |
-|---------|---------|-----------|
-| Morning commute | 8-10 AM | Coffee, Breakfast, Transit |
-| Lunch | 12-2 PM | Food, Restaurants |
-| Evening commute | 5-7 PM | Entertainment, Delivery |
-| Weekend | Sat/Sun | Shopping, Family |
-| Rainy day | Weather signal | Indoor activities |
+Handle financial calculations without floating-point errors:
+
+```typescript
+import {
+  money,
+  moneyFromCents,
+  calculateCPMCost,
+  formatMoney,
+  formatMoneyCompact,
+  addMoney,
+  multiplyMoney,
+} from '@rez/dooh-shared';
+
+// Create money amounts (stored as cents internally)
+const cpm = money(25, 'INR');  // ₹25.00 stored as 2500 cents
+const impressions = 10000;
+
+// Calculate cost
+const cost = calculateCPMCost(cpm, impressions);
+
+// Format for display
+console.log(formatMoney(cost));        // "₹25.00"
+console.log(formatMoneyCompact(cost)); // "₹25"
+
+// Arithmetic
+const total = addMoney(cost, cpm);
+const discounted = multiplyMoney(total, 0.9);
+```
+
+---
+
+## Integration with Ecosystem
+
+| Package | Purpose | Location |
+|---------|---------|----------|
+| `@rez/dooh-shared` | **Canonical types** | RTNM-Group/shared-types/dooh |
+| `rez-dooh-service` | Unified backend service | REZ-Media/rez-dooh-service |
+| `dooh-screen-app` | Next.js screen display | REZ-Media/dooh-screen-app |
+| `dooh-mobile` | React Native owner app | REZ-Media/dooh-mobile |
+
+### External Integrations
+
+```
+DOOH
+ ├── AdOS → Decision engine
+ ├── AdBazaar → Campaign inventory
+ ├── AdsQR → Attribution layer
+ └── ReZ Mind → Context signals
+```
+
+---
+
+## Quick Start
+
+```typescript
+import { createDOOHNetwork } from '@rez/dooh-shared';
+
+const dooh = createDOOHNetwork();
+
+// Get ads for a screen
+const ads = dooh.getAds(screenId, campaigns);
+
+// Generate playlist
+const playlist = dooh.generatePlaylist(screenId, campaigns);
+
+// Get network stats
+const stats = dooh.getStats();
+```
+
+---
+
+## Security Features
+
+- **Input Validation**: All API inputs validated with Zod schemas
+- **State Machine Validation**: Prevents invalid status transitions
+- **Money Precision**: Integer cents avoid floating-point errors
+- **Rate Limiting**: Built-in rate limiting middleware
+- **Authentication**: Token-based auth for all protected endpoints
+- **Per-Screen API Keys**: Each screen has unique authentication
+
+---
+
+## Contributing
+
+When adding new types:
+
+1. Add types to `src/types.ts`
+2. Add corresponding Zod schema to `src/schemas.ts`
+3. Add state machine transitions to `src/state-machines.ts` if applicable
+4. Update this README
+5. Export from `src/index.ts`
+
+---
+
+## API Endpoints
+
+### Screen Management
+```
+POST   /api/screens/register      - Register new screen
+GET    /api/screens               - List screens
+GET    /api/screens/:id           - Get screen details
+PATCH  /api/screens/:id           - Update screen
+DELETE /api/screens/:id           - Remove screen
+POST   /api/screens/:id/status   - Update status
+POST   /api/screens/:id/heartbeat - Process heartbeat
+GET    /api/screens/:id/apikey    - Get API key
+POST   /api/screens/:id/apikey/rotate - Rotate API key
+```
+
+### Analytics
+```
+POST   /api/analytics/impressions - Record impressions
+GET    /api/analytics/screen/:id - Screen analytics
+GET    /api/analytics/campaign/:id - Campaign analytics
+```
+
+### Health
+```
+GET    /health                   - Service health
+GET    /ready                     - Readiness check
+```
 
 ---
 
@@ -149,110 +372,12 @@ const cost = impressions * (cpmRate / 1000)
 | Standard | Other hours | 1x |
 | Off-peak | Late night | 0.5x |
 
-### Performance Add-on
-- Cost per scan (₹2-5)
-- Cost per visit (₹10-20)
-- Cost per purchase (₹50-100)
-
----
-
-## Screen Owner Revenue Share
-
+### Screen Owner Revenue Share
 | Model | Owner | Platform |
 |-------|-------|----------|
 | CPM | 60% | 40% |
 | Performance | 70% | 30% |
 | Hybrid | 65% | 35% |
-
----
-
-## API Endpoints
-
-### Screen Management
-```
-POST   /api/screens/register
-GET    /api/screens
-GET    /api/screens/:id
-PATCH  /api/screens/:id/status
-DELETE /api/screens/:id
-```
-
-### Delivery
-```
-POST   /api/delivery/request
-GET    /api/delivery/ads/:screenId
-```
-
-### Playlist
-```
-POST   /api/playlist/generate
-GET    /api/playlist/:screenId
-```
-
-### Reporting
-```
-POST   /api/heartbeat
-POST   /api/impressions
-GET    /api/screens/:id/stats
-```
-
----
-
-## Files
-
-```
-dooh/
-├── src/
-│ ├── index.ts              # Main orchestrator
-│ ├── types.ts             # TypeScript interfaces
-│ └── services/
-│     ├── screen.service.ts     # Screen management
-│     ├── delivery.service.ts   # Ad delivery
-│     └── playlist.service.ts    # Playlist generation
-├── package.json
-└── README.md
-```
-
----
-
-## Integration with Ecosystem
-
-```
-DOOH
- ├── AdOS → Decision engine
- ├── AdBazaar → Campaign inventory
- ├── AdsQR → Attribution layer
- └── ReZ Mind → Context signals
-```
-
----
-
-## Quick Start
-
-```typescript
-import { createDOOHNetwork } from './src'
-
-const dooh = createDOOHNetwork()
-
-// Get ads for a screen
-const ads = dooh.getAds(screenId, campaigns)
-
-// Generate playlist
-const playlist = dooh.generatePlaylist(screenId, campaigns)
-
-// Get network stats
-const stats = dooh.getStats()
-```
-
----
-
-## Next Steps
-
-1. Connect to AdBazaar for campaign inventory
-2. Integrate ReZ Mind for context signals
-3. Build Screen OS player app
-4. Deploy to test screens
-5. Add real-time analytics
 
 ---
 
