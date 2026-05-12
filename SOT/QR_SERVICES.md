@@ -283,3 +283,19 @@ May 11, 2026
 - [REZ-Media/README.md](../REZ-Media/README.md)
 - [StayOwn-Hospitality/README.md](../StayOwn-Hospitality/README.md)
 - [RTNM-Group/README.md](../RTNM-Group/README.md)
+
+## QR SERVICES - FINAL MAPPING (Updated)
+
+| QR Type | Company | Service | Purpose |
+|---------|---------|---------|---------|
+| Verify Product QR | REZ-Consumer | verify-qr-service | Product warranty |
+| Room QR | StayOwn | verify-service | Hotel room access |
+| ReZ Now QR | REZ-Consumer | rez-now | Instant commerce |
+| Menu QR | REZ-Consumer | rez-web-menu | Restaurant menu |
+| AdQR | REZ-Media | adsqr | Ad campaigns |
+| Shelf QR | REZ-Media | rez-shelf-qr | Product scanning |
+| Creator QR | REZ-Media | creators | Influencer links |
+
+### Note
+- RTNM-Group handles internal admin only (warranty rules, merchant verification API)
+- REZ-Consumer handles client-facing (warranty activation, claims, dashboard)
