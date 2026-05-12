@@ -123,6 +123,12 @@
 | REZ-bnpl-service | Buy Now Pay Later |
 | REZ-capital-service | Capital financing |
 
+### Privacy Services
+
+| Service | Purpose |
+|---------|---------|
+| **REZ-privacy-layer** | Transaction masking |
+
 ---
 
 ## REZ-Intelligence (AI/ML Platform)
