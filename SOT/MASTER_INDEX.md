@@ -1,7 +1,7 @@
 # SOT - MASTER INDEX - MAY 12, 2026
 
-**Version:** 6.0  
-**Status:** COMPLETE PLATFORM BUILD
+**Version:** 7.0  
+**Status:** COMPLETE + NEW FEATURES
 
 ---
 
@@ -77,6 +77,8 @@
 | **REZ-assistant** | Consumer AI Chat | REZ-Mind, Intent-Graph |
 | **REZ-save** | Wishlist | Intelligence, Agent |
 | **REZ-inbox** | Email Import | Analytics |
+| **REZ-nearby** | Classifieds | Intelligence |
+| **REZ-bills** | Smart Receipt Scanner | Wallet, verify-qr |
 
 ### Existing Apps
 
@@ -159,6 +161,29 @@
 | REZ-analytics-orchestrator | Cross-platform analytics |
 | REZ-attribution-system | Attribution tracking |
 | REZ-ab-testing-service | A/B testing |
+| **REZ-attribution-platform** | Offline attribution |
+
+---
+
+## REZ-Media (Engagement)
+
+### NEW Growth Services
+
+| Service | Purpose | Integrations |
+|---------|---------|--------------|
+| **REZ-attribution-platform** | Offline attribution | scan, payments |
+| **REZ-referral-graph** | AI referral network | wallet, intelligence |
+| **REZ-attribution-dashboard** | Attribution dashboard | - |
+| **REZ-referral-dashboard** | Referral dashboard | - |
+
+### Existing Services
+
+| Service | Purpose |
+|---------|---------|
+| REZ-ads-service | Ads API |
+| REZ-ad-ai | AI optimization |
+| AdBazaar | Ad marketplace |
+| adsqr | QR ads |
 
 ---
 
