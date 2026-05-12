@@ -13,7 +13,7 @@ import axios from 'axios';
 
 const app: Application = express();
 const PORT = parseInt(process.env.PORT || '4010', 10);
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://work_db_user:ZAFYAYH1zK0C74Ap@rez-intent-graph.a8ilqgi.mongodb.net/rez-feedback?retryWrites=true&w=majority';
+const MONGODB_URI = process.env.MONGODB_URI || '';  // REQUIRED: Set MONGODB_URI env var
 const EVENT_PLATFORM_URL = process.env.EVENT_PLATFORM_URL || 'http://localhost:4008';
 
 // Schema

@@ -16,7 +16,7 @@ import axios from 'axios';
 
 const app: Application = express();
 const PORT = parseInt(process.env.PORT || '4009', 10);
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://work_db_user:ZAFYAYH1zK0C74Ap@rez-intent-graph.a8ilqgi.mongodb.net/rez-actions?retryWrites=true&w=majority';
+const MONGODB_URI = process.env.MONGODB_URI || '';  // REQUIRED: Set MONGODB_URI env var
 const FEEDBACK_SERVICE_URL = process.env.FEEDBACK_SERVICE_URL || 'http://localhost:4010';
 
 // Safety thresholds for auto-actions
