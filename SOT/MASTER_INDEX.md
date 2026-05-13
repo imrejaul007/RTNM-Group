@@ -1,6 +1,6 @@
-# SOT - MASTER INDEX - MAY 12, 2026
+# SOT - MASTER INDEX - MAY 13, 2026
 
-**Version:** 8.0  
+**Version:** 9.0  
 **Status:** COMPLETE PLATFORM
 
 ---
@@ -301,6 +301,16 @@ Invite → Signup → Quality → Reward → Network
 Campaign → QR Display → Scan → Visit → Purchase → Report
 ```
 
+### 6. AdQR → Scan → Earn Coins
+```
+AdQR Scan → Award Coins → Gamification → Engagement
+```
+
+### 7. Creator Campaign → QR → Attribution
+```
+Creator Link → QR Scan → Scan → Attribution → Earnings
+```
+
 ---
 
 ## INTEGRATION MATRIX
@@ -365,11 +375,13 @@ BNPL_API=https://rez-bnpl.onrender.com
 
 | Document | Location |
 |----------|----------|
-| Master SOT | RTNM-Group/SOT/MASTER_INDEX.md |
+| Master SOT | SOT/MASTER_INDEX.md |
+| Complete Audit | SOT/COMMERCE_OS_COMPLETE_AUDIT.md |
 | Integration Tests | CROSS_CONNECTION_TESTS.md |
 | Final Documentation | FINAL_DOCUMENTATION.md |
-| QR Ecosystem | RTNM-Group/SOT/QR_SERVICES.md |
-| Verify QR Audit | RTNM-Group/SOT/VERIFY_QR_AUDIT.md |
+| QR Ecosystem | SOT/QR_SERVICES.md |
+| Verify QR Audit | SOT/VERIFY_QR_AUDIT.md |
+| Deployment Guide | SOT/PRODUCTION_DEPLOYMENT.md |
 
 ---
 

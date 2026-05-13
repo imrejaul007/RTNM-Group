@@ -1,7 +1,7 @@
 # RTNM-Group Source of Truth (SOT)
 
-> **Last Updated:** 2026-05-12
-> **Version:** 2.0.0
+> **Last Updated:** 2026-05-13
+> **Version:** 3.0.0
 > **Status:** Active
 
 ---
@@ -17,6 +17,8 @@
 7. [Deployment Guide](#7-deployment-guide)
 8. [Environment Variables](#8-environment-variables)
 9. [Troubleshooting](#9-troubleshooting)
+10. [Cross-Platform References](#10-cross-platform-references)
+11. [Documentation Index](#11-documentation-index)
 
 ---
 
@@ -50,9 +52,11 @@
 
 ### 1.3 Service Count
 
-| Company | Services | Purpose |
-|---------|----------|---------|
-| RTNM-Group | 22 | Controls + Financial |
+| Company | Services | Documentation |
+|---------|----------|---------------|
+| **RTNM-Group** | 22 | `SOT/SOURCE_OF_TRUTH.md` |
+| **RABTUL-Technologies** | 40 | `RABTUL-Technologies/docs/SERVICES.md` |
+| **REZ-Intelligence** | 60+ | `REZ-Intelligence/docs/SERVICES.md` | | Controls + Financial |
 | RABTUL-Technologies | 30 | Infrastructure |
 | REZ-Intelligence | 60+ | AI/ML Platform |
 | REZ-Media | 15+ | Advertising |
@@ -799,17 +803,135 @@ kubectl logs -n rtnm-group -l app=identity-service | grep ERROR
 | OpenAPI Spec | `docs/openapi.yaml` |
 | Postman Collection | `docs/postman-collection.json` |
 | Security Audit | `docs/SECURITY_AUDIT.md` |
+| Runbooks | `docs/RUNBOOKS.md` |
+| Onboarding Guide | `docs/ONBOARDING.md` |
 | Test Suite | `test/*.test.ts` |
+| RABTUL-Technologies Docs | `RABTUL-Technologies/docs/SERVICES.md` |
+| REZ-Intelligence Docs | `REZ-Intelligence/docs/SERVICES.md` |
 
 ## Appendix C: Changelog
 
 | Date | Version | Changes |
 |------|---------|---------|
+| 2026-05-13 | 3.0.0 | Full documentation complete, cross-platform refs added |
 | 2026-05-12 | 2.0.0 | Security fixes, RBAC improvements |
 | 2026-01-01 | 1.0.0 | Initial documentation |
 
 ---
 
+## 10. Cross-Platform References
+
+### 10.1 RABTUL-Technologies
+
+**Location:** `/RABTUL-Technologies/`
+
+**Full Documentation:** `RABTUL-Technologies/docs/SERVICES.md`
+
+| Service | Port | Purpose |
+|---------|------|---------|
+| rez-auth-service | 4002 | Authentication (OTP, JWT, MFA) |
+| rez-payment-service | 4001 | Payment processing (Razorpay, Stripe) |
+| rez-wallet-service | 4004 | Digital wallet |
+| rez-order-service | 4005 | Order management |
+| rez-catalog-service | 4006 | Product catalog |
+| rez-search-service | 4007 | Elasticsearch search |
+| rez-profile-service | 4008 | User profiles |
+| rez-notifications-service | 4009 | Push, SMS, Email |
+| rez-analytics-service | 4010 | Business intelligence |
+| REZ-observability-platform | 4015 | Monitoring & alerts |
+| REZ-policy-engine | 4016 | Business rules |
+| REZ-secrets-manager | 4017 | API key management |
+| REZ-scheduler-service | 4020 | Cron jobs |
+
+### 10.2 REZ-Intelligence
+
+**Location:** `/REZ-Intelligence/`
+
+**Full Documentation:** `REZ-Intelligence/docs/SERVICES.md`
+
+| Service | Port | Purpose |
+|---------|------|---------|
+| REZ-reorder-engine | 4040 | Reorder predictions |
+| REZ-taste-profile | 4041 | User preferences |
+| REZ-demand-forecast | 4042 | Demand prediction |
+| REZ-price-predictor | 4043 | Price optimization |
+| REZ-identity-graph | 4050 | Identity resolution |
+| REZ-memory-engine | 4051 | Agent memory |
+| REZ-ai-router | 4052 | AI routing |
+| REZ-knowledge-graph | 4060 | Knowledge base |
+| REZ-merchant-brain | 4061 | Merchant insights |
+| REZ-autonomous-agents | 4062 | 30 AI agents |
+| REZ-payments-brain | 4070 | Payment intelligence |
+| REZ-inventory-sync | 4071 | Inventory management |
+| REZ-creator-network | 4072 | Creator marketplace |
+| REZ-merchant-os | 4073 | Merchant OS |
+| REZ-event-bus | 4031 | Event distribution |
+| REZ-integration-sdk | 4091 | Unified SDK |
+| REZ-unified-recommendations | 4090 | All recommendations |
+
+### 10.3 Service Communication
+
+```
+Client Apps
+    │
+    ▼
+API Gateway (RABTUL) ────────► Auth, Payment, Wallet, Order
+    │
+    ▼
+RTNM-Group Services ◄───────── Identity, Capital, BNPL, Compliance
+    │
+    ▼
+REZ-Intelligence ◄────────────── AI/ML, Recommendations, Events
+```
+
+### 10.4 Shared Infrastructure
+
+| Service | Provider | Purpose |
+|---------|----------|---------|
+| MongoDB | Atlas | Primary database |
+| Redis | Cloud | Cache, sessions, pub/sub |
+| Sentry | sentry.io | Error tracking |
+| Prometheus | Metrics | Metrics collection |
+| Grafana | Dashboards | Visualization |
+
+---
+
+## 11. Documentation Index
+
+### 11.1 RTNM-Group
+
+| Document | Path |
+|---------|------|
+| Source of Truth | `SOT/SOURCE_OF_TRUTH.md` |
+| Architecture Diagrams | `SOT/ARCHITECTURE_DIAGRAMS.md` |
+| Security Audit | `docs/SECURITY_AUDIT.md` |
+| Runbooks | `docs/RUNBOOKS.md` |
+| Onboarding | `docs/ONBOARDING.md` |
+| API Specification | `docs/openapi.yaml` |
+| Postman Collection | `docs/postman-collection.json` |
+
+### 11.2 RABTUL-Technologies
+
+| Document | Path |
+|---------|------|
+| Services | `RABTUL-Technologies/docs/SERVICES.md` |
+
+### 11.3 REZ-Intelligence
+
+| Document | Path |
+|---------|------|
+| Services | `REZ-Intelligence/docs/SERVICES.md` |
+
+### 11.4 Missing Services (TODO)
+
+| Service | Status |
+|---------|--------|
+| REZ-trust-service | Scaffold - needs implementation |
+| REZ-compliance-platform | Scaffold - needs implementation |
+| REZ-financial-ledger-platform | Scaffold - needs implementation |
+
+---
+
 **Document Owner:** Engineering Team
 **Review Cycle:** Monthly
-**Next Review:** 2026-06-12
+**Next Review:** 2026-06-13
