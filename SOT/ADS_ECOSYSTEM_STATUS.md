@@ -43,6 +43,38 @@
 
 ---
 
+## BIDDING SYSTEM (Already Built)
+
+| Feature | Status |
+|---------|--------|
+| **Bidding Strategies** | auto, manual, target_roas, target_cpa |
+| **CPC Bidding** | |
+| **CPM Bidding** | |
+| **Max CPC** | |
+| **Bid Multiplier** | |
+| **Budget Allocation** | |
+| **Daily Limits** | |
+| **Pacing** | frontloaded, evenspeed, accelerated |
+
+### Bidding Strategies
+```typescript
+type BiddingStrategy = 'auto' | 'manual' | 'target_roas' | 'target_cpa';
+```
+
+### Campaign Types with Bidding
+- Search Ads
+- Feed Ads
+- QR Ads
+- Location Ads
+
+### Performance Tracking
+- Real-time metrics
+- ROAS calculation
+- CTR tracking
+- Conversion tracking
+
+---
+
 ## CAMPAIGN TYPES
 
 | Type | Service | Status |
