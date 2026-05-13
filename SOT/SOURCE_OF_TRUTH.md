@@ -921,6 +921,7 @@ REZ-Intelligence ◄────────────── AI/ML, Recommenda
 | Document | Path |
 |---------|------|
 | Services | `REZ-Intelligence/docs/SERVICES.md` |
+| Complete Features | `REZ-Intelligence/docs/COMPLETE_FEATURES.md` |
 
 ### 11.4 Missing Services (TODO)
 
