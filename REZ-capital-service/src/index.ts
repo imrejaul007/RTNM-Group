@@ -1,11 +1,13 @@
 import express, { Application, Request, Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import helmet from 'helmet';
 import logger from './utils/logger';
 import creditRoutes from './routes/credit';
 import loanRoutes from './routes/loans';
 import repaymentRoutes from './routes/repayments';
 import { partnerAuth } from './middleware/partnerAuth';
+import { authMiddleware, rateLimitMiddleware, requestIdMiddleware, errorHandler, ALLOWED_ORIGINS } from './middleware/auth';
 
 // Event listeners - Initialize integrations with merchant and finance services
 import './events/merchantEvents';
@@ -16,8 +18,22 @@ dotenv.config();
 const app: Application = express();
 
 // Middleware
-app.use(express.json());
+app.use(requestIdMiddleware);
+app.use(helmet());
+app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
+app.use(rateLimitMiddleware);
+
+// CORS
+app.use((req: Request, res: Response, next: NextFunction) => {
+  const origin = req.headers.origin;
+  if (origin && ALLOWED_ORIGINS.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Internal-Token');
+  next();
+});
 
 // Request logging
 app.use((req: Request, res: Response, next: NextFunction) => {
@@ -37,10 +53,16 @@ app.get('/health', (req: Request, res: Response) => {
   });
 });
 
+// Apply authentication to API routes
+app.use('/api', authMiddleware);
+
 // API Routes
 app.use('/api/credit', creditRoutes);
 app.use('/api/loans', loanRoutes);
 app.use('/api/repayments', repaymentRoutes);
+
+// Error handler
+app.use(errorHandler);
 
 // Partner webhook endpoints (authenticated)
 app.post('/api/webhooks/partner/:partnerId', partnerAuth, (req: Request, res: Response) => {
