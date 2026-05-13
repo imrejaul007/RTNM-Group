@@ -217,13 +217,11 @@
 | Trust | 100% | 0% |
 | Hospitality | 100% | 0% |
 
-## ACTUALLY MISSING: 5%
+## ACTUALLY MISSING: 3%
 
 | Feature | Priority |
 |---------|----------|
 | Video Ads | HIGH |
-| adsqr backend API | HIGH |
-| QR Mini-Games | HIGH |
 | Programmatic Bidding | MEDIUM |
 | Partner SDK | MEDIUM |
 

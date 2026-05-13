@@ -923,7 +923,13 @@ REZ-Intelligence ◄────────────── AI/ML, Recommenda
 | Services | `REZ-Intelligence/docs/SERVICES.md` |
 | Complete Features | `REZ-Intelligence/docs/COMPLETE_FEATURES.md` |
 
-### 11.4 Missing Services (TODO)
+### 11.4 Complete App Inventory
+
+| Document | Path |
+|----------|------|
+| Complete Inventory | `docs/COMPLETE_APP_INVENTORY.md` |
+
+### 11.5 Missing Services (TODO)
 
 | Service | Status |
 |---------|--------|
