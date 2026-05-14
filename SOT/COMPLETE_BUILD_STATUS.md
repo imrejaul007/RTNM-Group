@@ -217,11 +217,10 @@
 | Trust | 100% | 0% |
 | Hospitality | 100% | 0% |
 
-## ACTUALLY MISSING: 3%
+## ACTUALLY MISSING: 2%
 
 | Feature | Priority |
 |---------|----------|
-| Video Ads | HIGH |
 | Programmatic Bidding | MEDIUM |
 | Partner SDK | MEDIUM |
 
