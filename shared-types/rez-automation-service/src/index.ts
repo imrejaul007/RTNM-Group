@@ -37,11 +37,24 @@ class ApplicationServer {
     // Security middleware
     this.app.use(helmet());
 
-    // CORS
+    // CORS - explicit origins only
+    const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',').filter(Boolean) || [];
+    const corsOrigin = (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+      if (!origin) return callback(null, true);
+      if (!this.config.isProduction && (origin.includes('localhost') || origin.includes('127.0.0.1'))) {
+        return callback(null, true);
+      }
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      callback(new Error(`Origin ${origin} not allowed by CORS policy`));
+    };
+
     this.app.use(cors({
-      origin: '*',
+      origin: corsOrigin,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-      allowedHeaders: ['Content-Type', 'Authorization'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'X-Internal-Token'],
+      credentials: true,
     }));
 
     // Compression

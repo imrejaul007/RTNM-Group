@@ -32,15 +32,36 @@ const corpAnalyticsRoutes = require('./routes/corpAnalyticsRoutes');
 const corpWalletRoutes = require('./routes/corpWalletRoutes');
 
 const app = express();
+const PORT = parseInt(process.env.PORT || '4013', 10);
+const nodeEnv = process.env.NODE_ENV || 'development';
+const isProduction = nodeEnv === 'production';
+
+// Security: Fail fast on missing CORS in production
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || '').split(',').filter(s => s.trim());
+if (isProduction && allowedOrigins.length === 0) {
+  throw new Error('[FATAL] ALLOWED_ORIGINS is required in production');
+}
+
+// CORS - explicit origins only
+const corsOrigin = (origin, callback) => {
+  if (!origin) return callback(null, true);
+  if (!isProduction && (origin.includes('localhost') || origin.includes('127.0.0.1'))) {
+    return callback(null, true);
+  }
+  if (allowedOrigins.includes(origin)) {
+    return callback(null, true);
+  }
+  callback(new Error(`Origin ${origin} not allowed by CORS policy`));
+};
 
 // Middleware
 app.set('trust proxy', 1);
 app.use(helmet());
 app.use(cors({
-  origin: (process.env.CORS_ORIGIN || '*').split(',').map(s => s.trim()),
+  origin: corsOrigin,
   credentials: true,
 }));
-app.use(express.json({ limit: '10mb' }));
+app.use(express.json({ limit: '100kb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(mongoSanitize());
 
