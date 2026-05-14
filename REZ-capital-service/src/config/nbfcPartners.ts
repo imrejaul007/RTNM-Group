@@ -13,6 +13,9 @@ export interface NBFCPartnerConfig {
   timeout: number;
 }
 
+const nodeEnv = process.env.NODE_ENV || 'development';
+const isProduction = nodeEnv === 'production';
+
 function getRequiredEnv(envVar: string, partnerId: string, field: string): string {
   const value = process.env[envVar];
   if (!value) {
@@ -21,10 +24,24 @@ function getRequiredEnv(envVar: string, partnerId: string, field: string): strin
   return value;
 }
 
+function getRequiredUrl(envVar: string, partnerId: string): string {
+  const value = process.env[envVar];
+  if (!value) {
+    throw new Error(`Missing required environment variable ${envVar} for partner ${partnerId}. API URL is required.`);
+  }
+  // Validate URL format
+  try {
+    new URL(value);
+  } catch {
+    throw new Error(`Invalid URL format for ${envVar} for partner ${partnerId}: ${value}`);
+  }
+  return value;
+}
+
 export const nbfcPartners: Record<string, NBFCPartnerConfig> = {
   capital_float: {
     name: 'Capital Float',
-    apiUrl: process.env.CAPITAL_FLOAT_API_URL || 'https://api.capitalfloat.com/v2',
+    apiUrl: getRequiredUrl('CAPITAL_FLOAT_API_URL', 'capital_float'),
     apiKey: getRequiredEnv('CAPITAL_FLOAT_API_KEY', 'capital_float', 'API Key'),
     enabled: process.env.CAPITAL_FLOAT_ENABLED === 'true',
     endpoints: {
@@ -40,7 +57,7 @@ export const nbfcPartners: Record<string, NBFCPartnerConfig> = {
   },
   pinelabs: {
     name: 'PineLabs',
-    apiUrl: process.env.PINELABS_API_URL || 'https://api.pinelabs.com/v1',
+    apiUrl: getRequiredUrl('PINELABS_API_URL', 'pinelabs'),
     apiKey: getRequiredEnv('PINELABS_API_KEY', 'pinelabs', 'API Key'),
     enabled: process.env.PINELABS_ENABLED === 'true',
     endpoints: {
@@ -49,14 +66,14 @@ export const nbfcPartners: Record<string, NBFCPartnerConfig> = {
       health: '/status',
     },
     headers: {
-      'X-Merchant-Id': process.env.PINELABS_MERCHANT_ID || '',
+      'X-Merchant-Id': getRequiredEnv('PINELABS_MERCHANT_ID', 'pinelabs', 'Merchant ID'),
     },
     webhookSecret: process.env.PINELABS_WEBHOOK_SECRET,
     timeout: 30000,
   },
   indifi: {
     name: 'Indifi',
-    apiUrl: process.env.INDIFI_API_URL || 'https://api.indifi.com/v1',
+    apiUrl: getRequiredUrl('INDIFI_API_URL', 'indifi'),
     apiKey: getRequiredEnv('INDIFI_API_KEY', 'indifi', 'API Key'),
     enabled: process.env.INDIFI_ENABLED === 'true',
     endpoints: {
@@ -65,14 +82,14 @@ export const nbfcPartners: Record<string, NBFCPartnerConfig> = {
       health: '/health',
     },
     headers: {
-      'X-Client-Id': process.env.INDIFI_CLIENT_ID || '',
+      'X-Client-Id': getRequiredEnv('INDIFI_CLIENT_ID', 'indifi', 'Client ID'),
     },
     webhookSecret: process.env.INDIFI_WEBHOOK_SECRET,
     timeout: 30000,
   },
   lending_kart: {
     name: 'LendingKart',
-    apiUrl: process.env.LENDINGKART_API_URL || 'https://api.lendingkart.com/v2',
+    apiUrl: getRequiredUrl('LENDINGKART_API_URL', 'lending_kart'),
     apiKey: getRequiredEnv('LENDINGKART_API_KEY', 'lending_kart', 'API Key'),
     enabled: process.env.LENDINGKART_ENABLED === 'true',
     endpoints: {
