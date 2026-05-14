@@ -118,6 +118,16 @@
 | **REZ-cdp-service** | Customer data |
 | **REZ-feature-store** | ML features |
 
+### NEW - Programmatic & Partner
+
+| Service | Features |
+|---------|----------|
+| **REZ-video-ads** | Video advertising |
+| **REZ-programmatic-bidding** | RTB engine |
+| **REZ-partner-sdk** | Third-party SDK |
+| **REZ-partner-portal** | Partner dashboard |
+| **rez-ssp-adapter** | SSP integration |
+
 ---
 
 # PART 5: COMMERCE
@@ -217,12 +227,9 @@
 | Trust | 100% | 0% |
 | Hospitality | 100% | 0% |
 
-## ACTUALLY MISSING: 2%
+## ACTUALLY MISSING: 0%
 
-| Feature | Priority |
-|---------|----------|
-| Programmatic Bidding | MEDIUM |
-| Partner SDK | MEDIUM |
+**ALL FEATURES BUILT**
 
 ---
 
