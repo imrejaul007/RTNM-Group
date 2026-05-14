@@ -14,7 +14,7 @@ import axios from 'axios';
 import mongoose from 'mongoose';
 
 // Configuration
-const JWT_SECRET = process.env.ROOM_QR_JWT_SECRET || process.env.JWT_SECRET || 'room-qr-secret-key-change-in-production';
+const JWT_SECRET = process.env.ROOM_QR_JWT_SECRET || process.env.JWT_SECRET;
 const QR_BASE_URL = process.env.ROOM_QR_BASE_URL || 'https://rez.money/room';
 const HOTEL_OTA_API = process.env.HOTEL_OTA_API_URL || 'https://hotel-ota-api.onrender.com';
 
