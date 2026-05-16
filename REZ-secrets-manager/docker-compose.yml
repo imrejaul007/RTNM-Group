@@ -1,0 +1,77 @@
+version: '3.8'
+
+services:
+  vault:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rez-secrets-manager
+    ports:
+      - "4033:4033"
+    environment:
+      - NODE_ENV=production
+      - PORT=4033
+      - MONGODB_URI=mongodb://mongo:27017/rez-secrets-vault
+      - VAULT_MASTER_KEY=${VAULT_MASTER_KEY:?VAULT_MASTER_KEY is required}
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY:?ENCRYPTION_KEY is required}
+      - INTERNAL_SERVICE_TOKEN=${INTERNAL_SERVICE_TOKEN:?INTERNAL_SERVICE_TOKEN is required}
+      - RATE_LIMIT_WINDOW=60000
+      - RATE_LIMIT_MAX=100
+      - LOG_LEVEL=info
+      - ROTATION_CRON=0 */15 * * * *
+    depends_on:
+      mongo:
+        condition: service_healthy
+    volumes:
+      - vault_logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4033/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - vault-network
+
+  mongo:
+    image: mongo:7
+    container_name: vault-mongodb
+    ports:
+      - "27018:27017"
+    environment:
+      - MONGO_INITDB_DATABASE=rez-secrets-vault
+    volumes:
+      - mongo_data:/data/db
+      - mongo_config:/data/configdb
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - vault-network
+
+  # Optional: Redis for caching
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: vault-redis
+  #   ports:
+  #     - "6379:6379"
+  #   volumes:
+  #     - redis_data:/data
+  #   restart: unless-stopped
+  #   networks:
+  #     - vault-network
+
+volumes:
+  mongo_data:
+  mongo_config:
+  vault_logs:
+  # redis_data:
+
+networks:
+  vault-network:
+    driver: bridge
