@@ -7,15 +7,27 @@
  * - REZ-Media: Marketing, Loyalty, Engagement
  * - REZ-Intelligence: AI, Attribution
  * - RTNM-Digital: Trust, Operations
+ *
+ * FIXED: Added circuit breaker for fault tolerance
  */
 
-import axios, { AxiosInstance } from 'axios';
+import axios, { AxiosInstance, AxiosError } from 'axios';
 import { logger } from './logger.js';
 
 interface ServiceConfig {
   baseURL: string;
   timeout: number;
   token: string;
+}
+
+// Circuit breaker state
+type CircuitState = 'CLOSED' | 'OPEN' | 'HALF_OPEN';
+
+interface CircuitBreaker {
+  state: CircuitState;
+  failures: number;
+  lastFailure: number;
+  nextAttempt: number;
 }
 
 interface MerchantProfile {
@@ -58,6 +70,12 @@ interface ServiceStatus {
 export class MerchantGateway {
   private services: Map<string, AxiosInstance> = new Map();
   private serviceConfigs: Record<string, ServiceConfig>;
+
+  // Circuit breaker config
+  private circuitBreakers: Map<string, CircuitBreaker> = new Map();
+  private readonly CIRCUIT_THRESHOLD = 5; // failures before opening
+  private readonly CIRCUIT_TIMEOUT = 30000; // 30s before half-open
+  private readonly CIRCUIT_RESET = 60000; // 60s before attempting reset
 
   constructor() {
     this.serviceConfigs = {
@@ -154,6 +172,14 @@ export class MerchantGateway {
 
   private initializeClients(): void {
     for (const [name, config] of Object.entries(this.serviceConfigs)) {
+      // Initialize circuit breaker for each service
+      this.circuitBreakers.set(name, {
+        state: 'CLOSED',
+        failures: 0,
+        lastFailure: 0,
+        nextAttempt: 0
+      });
+
       const client = axios.create({
         baseURL: config.baseURL,
         timeout: config.timeout,
@@ -171,12 +197,52 @@ export class MerchantGateway {
             status: error.response?.status,
             message: error.message
           });
+          this.recordFailure(name);
           throw error;
         }
       );
 
       this.services.set(name, client);
     }
+  }
+
+  // Circuit breaker methods
+  private recordFailure(serviceName: string): void {
+    const cb = this.circuitBreakers.get(serviceName);
+    if (!cb) return;
+
+    cb.failures++;
+    cb.lastFailure = Date.now();
+
+    if (cb.failures >= this.CIRCUIT_THRESHOLD) {
+      cb.state = 'OPEN';
+      cb.nextAttempt = Date.now() + this.CIRCUIT_TIMEOUT;
+      logger.warn(`Circuit breaker OPEN for ${serviceName}`, { failures: cb.failures });
+    }
+  }
+
+  private recordSuccess(serviceName: string): void {
+    const cb = this.circuitBreakers.get(serviceName);
+    if (!cb) return;
+
+    cb.failures = 0;
+    cb.state = 'CLOSED';
+  }
+
+  private canAttempt(serviceName: string): boolean {
+    const cb = this.circuitBreakers.get(serviceName);
+    if (!cb) return true;
+
+    if (cb.state === 'CLOSED') return true;
+    if (cb.state === 'OPEN' && Date.now() >= cb.nextAttempt) {
+      cb.state = 'HALF_OPEN';
+      return true;
+    }
+    return false;
+  }
+
+  private getCircuitState(serviceName: string): CircuitState {
+    return this.circuitBreakers.get(serviceName)?.state || 'CLOSED';
   }
 
   /**
