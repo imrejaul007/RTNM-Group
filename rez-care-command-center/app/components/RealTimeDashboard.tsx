@@ -61,7 +61,7 @@ interface MerchantCommunication {
 }
 
 // Socket.IO connection hook
-function useSocket(url: string, agentId?: string) {
+function useSocket(url: string, agentId?: string, token?: string) {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [connected, setConnected] = useState(false);
 
@@ -75,8 +75,14 @@ function useSocket(url: string, agentId?: string) {
 
     newSocket.on('connect', () => {
       setConnected(true);
-      if (agentId) {
-        newSocket.emit('identify', { userId: agentId, role: 'agent' });
+      if (agentId && token) {
+        newSocket.emit('authenticate', { agentId, token });
+      }
+    });
+
+    newSocket.on('authenticated', (data: { success: boolean }) => {
+      if (data.success) {
+        console.log('[Socket] Authenticated with REZ Care');
       }
     });
 
@@ -89,13 +95,14 @@ function useSocket(url: string, agentId?: string) {
     return () => {
       newSocket.disconnect();
     };
-  }, [url, agentId]);
+  }, [url, agentId, token]);
 
   return { socket, connected };
 }
 
 // API helper
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4055';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4058';
+const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001';
 
 async function fetchAPI(endpoint: string) {
   const res = await fetch(`${API_BASE}${endpoint}`);
