@@ -62,8 +62,13 @@ export interface MerchantDocument {
 export class REEAdmin {
   private apiKey: string;
 
-  constructor(apiKey: string = process.env.RZ_ADMIN_KEY || 'admin-dev-key') {
-    this.apiKey = apiKey;
+  constructor(apiKey?: string) {
+    // SECURITY: Require explicit API key - never use fallback
+    const providedKey = apiKey || process.env.RZ_ADMIN_KEY;
+    if (!providedKey) {
+      throw new Error('[FATAL] RZ_ADMIN_KEY environment variable is required. Admin API key must be explicitly provided.');
+    }
+    this.apiKey = providedKey;
   }
 
   private async request<T>(endpoint: string, body?: any): Promise<T | null> {

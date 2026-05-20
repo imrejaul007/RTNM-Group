@@ -1,7 +1,0 @@
-serviceId: REE-ADMIN
-buildCommand: npm install && npm run build
-startCommand: npm start
-healthCheckPath: /health
-envVars:
-  - key: NODE_ENV
-    value: production

@@ -7,7 +7,7 @@
 
 import axios from 'axios';
 
-const EVENT_PLATFORM_URL = process.env.EVENT_PLATFORM_URL || 'http://localhost:4008';
+const EVENT_PLATFORM_URL = process.env.EVENT_PLATFORM_URL || 'http://localhost:4022';
 const ACTION_ENGINE_URL = process.env.ACTION_ENGINE_URL || 'http://localhost:4009';
 const TEST_ID = `dup_test_${Date.now()}`;
 

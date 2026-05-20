@@ -10,7 +10,7 @@ import axios from 'axios';
 const SERVICES = [
   { name: 'ReZ Mind', url: 'https://rez-intent-graph.onrender.com/health' },
   { name: 'Hotel OTA API', url: 'https://hotel-ota-api.onrender.com/health' },
-  { name: 'Event Platform (local)', url: 'http://localhost:4008/health' },
+  { name: 'Event Platform (local)', url: 'http://localhost:4022/health' },
   { name: 'Action Engine (local)', url: 'http://localhost:4009/health' },
   { name: 'Feedback Service (local)', url: 'http://localhost:4010/health' },
 ];

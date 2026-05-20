@@ -36,7 +36,7 @@ const connectMongoDB = async () => {
 };
 
 const app: Express = express();
-const PORT = process.env.PORT || 4018;
+const PORT = process.env.PORT || 4020;
 
 // SECURITY FIX: Global rate limiting
 const limiter = rateLimit({

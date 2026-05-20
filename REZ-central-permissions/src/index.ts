@@ -6,6 +6,7 @@
  */
 
 import express, { Request, Response, NextFunction } from 'express';
+import crypto from 'crypto';
 import {
   PermissionEngine,
   getPermissionEngine,
@@ -23,6 +24,48 @@ import { createPolicyFromTemplate, getTemplateNames } from './policies/PolicyTem
 // Express app setup
 const app = express();
 app.use(express.json());
+
+// =============================================================================
+// SECURITY - Authentication
+// =============================================================================
+
+const INTERNAL_TOKEN = process.env.INTERNAL_SERVICE_TOKEN || '';
+const TOKENS_JSON = process.env.INTERNAL_SERVICE_TOKENS_JSON || '{}';
+
+function timingSafeCompare(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  try {
+    return crypto.timingSafeEqual(Buffer.from(a), Buffer.from(b));
+  } catch {
+    return false;
+  }
+}
+
+function verifyToken(token: string): boolean {
+  if (INTERNAL_TOKEN && timingSafeCompare(token, INTERNAL_TOKEN)) return true;
+  try {
+    const tokens = JSON.parse(TOKENS_JSON);
+    return Object.values(tokens).some((t: string) => timingSafeCompare(token, t));
+  } catch {
+    return false;
+  }
+}
+
+function requireAuth(req: Request, res: Response, next: NextFunction): void {
+  const token = req.headers['x-internal-token'] as string;
+
+  if (!token) {
+    res.status(401).json({ error: 'Authentication required' });
+    return;
+  }
+
+  if (!verifyToken(token)) {
+    res.status(403).json({ error: 'Invalid token' });
+    return;
+  }
+
+  next();
+}
 
 // Initialize engine
 let engine: PermissionEngine;
@@ -137,8 +180,9 @@ app.get('/health', (_req: Request, res: Response) => {
 /**
  * Check permission
  * POST /api/v1/permissions/check
+ * SECURITY: Added requireAuth
  */
-app.post('/api/v1/permissions/check', async (req: Request, res: Response) => {
+app.post('/api/v1/permissions/check', requireAuth, async (req: Request, res: Response) => {
   try {
     // Rate limit check
     const clientIp = req.ip || 'unknown';
@@ -176,7 +220,7 @@ app.post('/api/v1/permissions/check', async (req: Request, res: Response) => {
  * Check permission (full response)
  * POST /api/v1/permissions/check-full
  */
-app.post('/api/v1/permissions/check-full', async (req: Request, res: Response) => {
+app.post('/api/v1/permissions/check-full', requireAuth, async (req: Request, res: Response) => {
   try {
     const request: PermissionRequest = req.body;
     const result: PermissionCheck = await engine.checkFull(request);
@@ -194,7 +238,7 @@ app.post('/api/v1/permissions/check-full', async (req: Request, res: Response) =
  * Batch permission check
  * POST /api/v1/permissions/check-batch
  */
-app.post('/api/v1/permissions/check-batch', async (req: Request, res: Response) => {
+app.post('/api/v1/permissions/check-batch', requireAuth, async (req: Request, res: Response) => {
   try {
     const request: PermissionRequest = req.body;
     const results = await engine.checkBatch(request);
@@ -218,7 +262,7 @@ app.post('/api/v1/permissions/check-batch', async (req: Request, res: Response) 
  * Get permission engine configuration
  * GET /api/v1/permissions/config
  */
-app.get('/api/v1/permissions/config', (_req: Request, res: Response) => {
+app.get('/api/v1/permissions/config', requireAuth, (_req: Request, res: Response) => {
   const config = engine.getConfig();
   res.json(config);
 });
@@ -227,7 +271,7 @@ app.get('/api/v1/permissions/config', (_req: Request, res: Response) => {
  * Update permission engine configuration
  * PUT /api/v1/permissions/config
  */
-app.put('/api/v1/permissions/config', (req: Request, res: Response) => {
+app.put('/api/v1/permissions/config', requireAuth, (req: Request, res: Response) => {
   try {
     const updates: Partial<PermissionConfig> = req.body;
     engine.updateConfig(updates);
@@ -245,7 +289,7 @@ app.put('/api/v1/permissions/config', (req: Request, res: Response) => {
  * Invalidate cache
  * POST /api/v1/permissions/cache/invalidate
  */
-app.post('/api/v1/permissions/cache/invalidate', async (req: Request, res: Response) => {
+app.post('/api/v1/permissions/cache/invalidate', requireAuth, async (req: Request, res: Response) => {
   try {
     const { user_id, resource } = req.body;
     await engine.invalidateCache(user_id, resource);
@@ -265,7 +309,7 @@ app.post('/api/v1/permissions/cache/invalidate', async (req: Request, res: Respo
  * Get all policies
  * GET /api/v1/policies
  */
-app.get('/api/v1/policies', async (_req: Request, res: Response) => {
+app.get('/api/v1/policies', requireAuth, async (_req: Request, res: Response) => {
   try {
     const policies = await engine.getPolicies();
     res.json(policies);
@@ -282,7 +326,7 @@ app.get('/api/v1/policies', async (_req: Request, res: Response) => {
  * Add new policy
  * POST /api/v1/policies
  */
-app.post('/api/v1/policies', async (req: Request, res: Response) => {
+app.post('/api/v1/policies', requireAuth, async (req: Request, res: Response) => {
   try {
     const policy: Policy = req.body;
     await engine.addPolicy(policy);
@@ -300,7 +344,7 @@ app.post('/api/v1/policies', async (req: Request, res: Response) => {
  * Remove policy
  * DELETE /api/v1/policies/:id
  */
-app.delete('/api/v1/policies/:id', async (req: Request, res: Response) => {
+app.delete('/api/v1/policies/:id', requireAuth, async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     await engine.removePolicy(id);
@@ -318,7 +362,7 @@ app.delete('/api/v1/policies/:id', async (req: Request, res: Response) => {
  * Create policy from template
  * POST /api/v1/policies/from-template
  */
-app.post('/api/v1/policies/from-template', async (req: Request, res: Response) => {
+app.post('/api/v1/policies/from-template', requireAuth, async (req: Request, res: Response) => {
   try {
     const { template, params } = req.body;
     const policy = createPolicyFromTemplate(template, params);
@@ -348,7 +392,7 @@ app.get('/api/v1/policies/templates', (_req: Request, res: Response) => {
  * Query audit log
  * POST /api/v1/audit/query
  */
-app.post('/api/v1/audit/query', async (req: Request, res: Response) => {
+app.post('/api/v1/audit/query', requireAuth, async (req: Request, res: Response) => {
   try {
     const filters = req.body;
     const entries = await engine.getAuditLog(filters);
@@ -366,7 +410,7 @@ app.post('/api/v1/audit/query', async (req: Request, res: Response) => {
  * Get audit statistics
  * GET /api/v1/audit/stats
  */
-app.get('/api/v1/audit/stats', async (req: Request, res: Response) => {
+app.get('/api/v1/audit/stats', requireAuth, async (req: Request, res: Response) => {
   try {
     const { start_date, end_date } = req.query;
     const entries = await engine.getAuditLog({

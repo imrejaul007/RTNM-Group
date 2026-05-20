@@ -7,7 +7,7 @@
 
 import axios from 'axios';
 
-const EVENT_PLATFORM_URL = process.env.EVENT_PLATFORM_URL || 'http://localhost:4008';
+const EVENT_PLATFORM_URL = process.env.EVENT_PLATFORM_URL || 'http://localhost:4022';
 const TEST_ID = `platform_fail_${Date.now()}`;
 
 async function testEventPlatformFailure() {

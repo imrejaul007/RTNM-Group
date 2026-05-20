@@ -15,7 +15,7 @@ import { logger } from './config/logger';
 
 const app: Application = express();
 const PORT = parseInt(process.env.PORT || '4009', 10);
-const EVENT_PLATFORM_URL = process.env.EVENT_PLATFORM_URL || 'http://localhost:4008';
+const EVENT_PLATFORM_URL = process.env.EVENT_PLATFORM_URL || 'http://localhost:4022';
 const MONGODB_URI = process.env.MONGODB_URI || '';  // REQUIRED: Set MONGODB_URI env var
 
 // Decision schema
