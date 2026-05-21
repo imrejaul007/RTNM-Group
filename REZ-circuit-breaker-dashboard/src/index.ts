@@ -51,7 +51,8 @@ const server = http.createServer(app);
 // Configure Socket.IO
 const io = new SocketIOServer(server, {
   cors: {
-    origin: '*',
+    origin: (process.env.ALLOWED_ORIGINS || 'https://rez.money').split(','),
+    credentials: true,
     methods: ['GET', 'POST']
   },
   path: '/socket.io'

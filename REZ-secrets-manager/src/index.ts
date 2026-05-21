@@ -52,7 +52,14 @@ class VaultServer {
 
     // CORS
     this.app.use(cors({
-      origin: process.env.CORS_ORIGINS?.split(',') || ['*'],
+      origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => {
+        const allowedOrigins = (process.env.ALLOWED_ORIGINS || process.env.CORS_ORIGINS || 'https://rez.money').split(',');
+        if (!origin || allowedOrigins.includes(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error('Not allowed by CORS'));
+        }
+      },
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
       allowedHeaders: [
         'Content-Type',
