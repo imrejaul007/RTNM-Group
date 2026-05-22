@@ -1,0 +1,212 @@
+version: '3.8'
+
+services:
+  # ===========================================
+  # NeXha Portal (Frontend)
+  # ===========================================
+  portal:
+    build:
+      context: ./portal
+      dockerfile: Dockerfile
+    ports:
+      - "4388:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=http://localhost:4388/api
+    depends_on:
+      - connector
+    networks:
+      - nexha-network
+
+  # ===========================================
+  # NeXha DistributionOS
+  # ===========================================
+  distribution-os:
+    build:
+      context: ./distribution-os
+      dockerfile: Dockerfile
+    ports:
+      - "4300:4000"
+    environment:
+      - NODE_ENV=production
+      - PORT=4000
+      - MONGODB_URI=mongodb://mongo:27017/nexha_distribution
+      - REDIS_URL=redis://redis:6379
+      - AUTH_SERVICE_URL=http://auth:4002
+    depends_on:
+      - mongo
+      - redis
+    networks:
+      - nexha-network
+
+  # ===========================================
+  # NeXha FranchiseOS
+  # ===========================================
+  franchise-os:
+    build:
+      context: ./franchise-os
+      dockerfile: Dockerfile
+    ports:
+      - "4310:4000"
+    environment:
+      - NODE_ENV=production
+      - PORT=4000
+      - MONGODB_URI=mongodb://mongo:27017/nexha_franchise
+      - REDIS_URL=redis://redis:6379
+      - AUTH_SERVICE_URL=http://auth:4002
+    depends_on:
+      - mongo
+      - redis
+    networks:
+      - nexha-network
+
+  # ===========================================
+  # NeXha ProcurementOS
+  # ===========================================
+  procurement-os:
+    build:
+      context: ./procurement-os
+      dockerfile: Dockerfile
+    ports:
+      - "4320:4000"
+    environment:
+      - NODE_ENV=production
+      - PORT=4000
+      - MONGODB_URI=mongodb://mongo:27017/nexha_procurement
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - mongo
+      - redis
+    networks:
+      - nexha-network
+
+  # ===========================================
+  # NeXha ManufacturingOS
+  # ===========================================
+  manufacturing-os:
+    build:
+      context: ./manufacturing-os
+      dockerfile: Dockerfile
+    ports:
+      - "4330:4000"
+    environment:
+      - NODE_ENV=production
+      - PORT=4000
+      - MONGODB_URI=mongodb://mongo:27017/nexha_manufacturing
+    depends_on:
+      - mongo
+    networks:
+      - nexha-network
+
+  # ===========================================
+  # NeXha Trade Finance
+  # ===========================================
+  trade-finance:
+    build:
+      context: ./trade-finance
+      dockerfile: Dockerfile
+    ports:
+      - "4340:4000"
+    environment:
+      - NODE_ENV=production
+      - PORT=4000
+      - MONGODB_URI=mongodb://mongo:27017/nexha_finance
+    depends_on:
+      - mongo
+    networks:
+      - nexha-network
+
+  # ===========================================
+  # NeXha Intelligence Layer
+  # ===========================================
+  intelligence-layer:
+    build:
+      context: ./intelligence-layer
+      dockerfile: Dockerfile
+    ports:
+      - "4350:4000"
+    environment:
+      - NODE_ENV=production
+      - PORT=4000
+    networks:
+      - nexha-network
+
+  # ===========================================
+  # NeXha Ecosystem Connector
+  # ===========================================
+  connector:
+    build:
+      context: ./ecosystem-connector
+      dockerfile: Dockerfile
+    ports:
+      - "4399:4000"
+    environment:
+      - NODE_ENV=production
+      - PORT=4000
+      - DISTRIBUTION_OS_URL=http://distribution-os:4000
+      - FRANCHISE_OS_URL=http://franchise-os:4000
+      - PROCUREMENT_OS_URL=http://procurement-os:4000
+      - MANUFACTURING_OS_URL=http://manufacturing-os:4000
+      - REZ_MERCHANT_URL=http://rez-merchant:4003
+      - REZ_INTELLIGENCE_URL=http://rez-intelligence:4018
+      - RTNM_FINANCE_URL=http://trade-finance:4000
+    depends_on:
+      - distribution-os
+      - franchise-os
+      - procurement-os
+    networks:
+      - nexha-network
+
+  # ===========================================
+  # Databases
+  # ===========================================
+  mongo:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - nexha-network
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - nexha-network
+
+  # ===========================================
+  # External Services (stubs for local development)
+  # ===========================================
+  auth:
+    image: node:20-alpine
+    command: "sleep infinity"
+    networks:
+      - nexha-network
+
+  rez-merchant:
+    image: node:20-alpine
+    command: "sleep infinity"
+    ports:
+      - "4003:4003"
+    networks:
+      - nexha-network
+
+  rez-intelligence:
+    image: node:20-alpine
+    command: "sleep infinity"
+    ports:
+      - "4018:4018"
+    networks:
+      - nexha-network
+
+networks:
+  nexha-network:
+    driver: bridge
+
+volumes:
+  mongo-data:
+  redis-data:

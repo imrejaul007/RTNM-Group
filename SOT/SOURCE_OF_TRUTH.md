@@ -262,6 +262,48 @@ N = Tenure in months
 
 ---
 
+### 2.2 Finance Services (Continued)
+
+#### RidZa Platform (Lead Distribution)
+| Attribute | Value |
+|-----------|-------|
+| **Port** | 4500-4504 |
+| **Location** | `RTNM-Group/rez-ridza-platform/` |
+| **Purpose** | Lead distribution like PolicyBazaar + Paisabazaar |
+
+**Services:**
+| Service | Port | Description |
+|---------|------|-------------|
+| `ridza-core` | 4500 | Lead engine, eligibility, matching |
+| `ridza-partner-api` | 4501 | Partner integrations (banks/NBFCs) |
+| `ridza-agent-portal` | 4502 | DSA/agent dashboard |
+| `ridza-corpperks-hub` | 4503 | CorpPerks employee finance |
+| `ridza-intelligence` | 4504 | REZ Intelligence integration |
+
+**API Endpoints (ridza-core:4500):**
+| Method | Endpoint | Description |
+|--------|---------|-------------|
+| POST | `/api/ridza/leads` | Create lead |
+| GET | `/api/ridza/leads` | List leads |
+| GET | `/api/ridza/leads/:id` | Get lead |
+| GET | `/api/ridza/products` | List products |
+| GET | `/api/ridza/products/match/:userId` | Match products |
+| GET | `/api/ridza/eligibility/:userId` | Check eligibility |
+
+**Revenue Model:**
+| Product | Agent Commission |
+|---------|----------------|
+| Personal Loan | 0.5-2% of loan |
+| Credit Card | ₹200-500/approval |
+| Insurance | 15-40% of first year premium |
+
+**Uses Existing:**
+- `rez-wallet-service:4004` → Credit scoring
+- `REZ Signal Aggregator:4142` → User signals
+- `REZ Fraud Agent:3007` → Risk scoring
+
+---
+
 ### 2.3 Admin & Operations
 
 #### rez-admin-service
